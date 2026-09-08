@@ -1,0 +1,57 @@
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import "./globals.css";
+
+/**
+ * Typography — DESIGN.md §3. Three families, three jobs, no overlap.
+ *
+ *   Instrument Serif  display only, 36px and above, regular weight only
+ *   Geist Sans        body and UI
+ *   Geist Mono        instrument labelling — coordinates, metrics, tags.
+ *                     Never body copy: mono prose is a terminal theme, which
+ *                     the brief rules out.
+ */
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Abyud Shetty — Field",
+  description:
+    "A spatial map of the systems and experiences I've built.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0E1011",
+  colorScheme: "dark",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
+    >
+      <body>{children}</body>
+    </html>
+  );
+}
