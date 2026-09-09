@@ -141,6 +141,23 @@ export function sampleCamera(progress: number) {
  * actually on screen. Before that the objects are scenery being travelled
  * toward, and hover would be noise.
  */
+/**
+ * When the field is allowed to be *glass*.
+ *
+ * A transmissive material does not cost what it looks like it costs. Three.js
+ * answers a single visible transmissive object by re-rendering the entire
+ * scene into a second target — so while the Endurance is on screen, twelve
+ * distant pebbles at the bottom of frame were forcing a 300,000-triangle
+ * craft and a 39,000-triangle figure to be drawn twice every frame. Measured,
+ * that was 6.7ms of a 15ms frame: forty-five per cent of the Experience spent
+ * refracting empty space behind stones nobody is looking at yet.
+ *
+ * So the stones stay solid until the craft beat is over, and resolve into
+ * glass as the camera settles into the field. Which is also the better story:
+ * distance withholds the material, arrival grants it.
+ */
+export const FIELD_OPTICS = { start: progressAt(370), end: progressAt(450) };
+
 export const INSPECTION_PROGRESS = progressAt(450);
 
 /** The static frame used for reduced motion and for the no-scroll fallback. */

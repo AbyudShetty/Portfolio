@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { TIER_PROFILE } from "./projectMaterials";
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { useMountTier } from "@/hooks/usePerformanceTier";
 import { scroll } from "@/hooks/useScrollProgress";
 import {
   atmosphereFactor,
@@ -97,7 +97,10 @@ export function AtmosphericPebbles({
   reducedMotion: boolean;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
-  const tier = usePerformanceTier();
+  // Frozen at mount, not live: how many of these exist decides what is on
+  // screen, and a count that changes part-way through a scroll reads as
+  // objects blinking out rather than as a frame saved.
+  const tier = useMountTier();
   const count = COUNT[tier];
 
   const drifters = useMemo(() => buildDrifters(count), [count]);
@@ -121,7 +124,15 @@ export function AtmosphericPebbles({
     const m = TIER_PROFILE["featured-1"].material;
     return new THREE.MeshPhysicalMaterial({
       color: m.bodyColor,
-      transmission: m.transmission,
+      // Class B is the one place the stone is *not* glass.
+      //
+      // These are drawn with frustum culling off, so a transmissive instance
+      // sits in the render list for the whole journey and keeps three.js's
+      // extra full-scene transmission pass alive from the first frame to the
+      // last — for stones that are deliberately soft, dimmed to 0.62 and
+      // scheduled to drift away. At that distance refraction contributes
+      // nothing the clearcoat and the environment do not already give.
+      transmission: 0,
       thickness: m.thickness,
       ior: m.ior,
       roughness: m.roughness,

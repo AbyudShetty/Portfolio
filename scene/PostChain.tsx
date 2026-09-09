@@ -7,7 +7,7 @@ import {
 } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { useMountTier } from "@/hooks/usePerformanceTier";
 
 /**
  * PostChain — restrained, and the first thing to go when frames get tight.
@@ -26,9 +26,12 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
  * and the field reads with more clarity without it. Noted as a deviation.
  */
 export function PostChain() {
-  const tier = usePerformanceTier();
+  // Frozen at mount. Bloom is what gives the bright stars their glow, so
+  // unmounting the chain part-way through a scroll puts the sky visibly out —
+  // which reads as stars going missing, not as a frame being saved.
+  const tier = useMountTier();
 
-  // T1 and below drop the chain entirely.
+  // A machine already struggling at mount never gets the chain at all.
   if (tier >= 1) return null;
 
   return (

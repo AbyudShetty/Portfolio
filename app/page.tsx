@@ -14,6 +14,7 @@ import { FieldFallback } from "@/ui/FieldFallback";
 import { InstrumentCursor } from "@/ui/InstrumentCursor";
 import { MobileNarrative } from "@/ui/MobileNarrative";
 import { ProjectList } from "@/ui/ProjectList";
+import { SpecimenPanel } from "@/ui/SpecimenPanel";
 import { TopRail } from "@/ui/TopRail";
 import {
   ExperienceSection,
@@ -54,6 +55,9 @@ export default function Page() {
     return (
       <main className="page page--mobile">
         <MobileNarrative />
+        {/* The list is the only way in here, and it selects — so the panel
+            has to exist on this path too, or the tap does nothing. */}
+        <SpecimenPanel reducedMotion={reducedMotion} />
       </main>
     );
   }
@@ -88,6 +92,10 @@ export default function Page() {
           <ProjectList variant="visible" />
         </section>
       ) : null}
+
+      {/* One stone at a time, held up to the lens. Mounted outside the
+          narrative so it sits above the canvas and below nothing. */}
+      <SpecimenPanel reducedMotion={reducedMotion} />
 
       <InstrumentCursor />
       <div className="grain" aria-hidden="true" />

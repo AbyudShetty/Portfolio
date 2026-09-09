@@ -173,10 +173,72 @@ export const APPROACH = {
  * graphite ground, which is the opposite of selecting it.
  */
 export const SELECTED = {
-  transmissionBoost: 0.14,
-  transmissionCeiling: 0.88,
-  emissiveIntensity: 0.2,
+  /* Well under §5's 0.20 ceiling. This is a lift on the stone's own body
+     tone, not a glow, and at 0.2 it washed the graphite toward mid-grey. */
+  emissiveIntensity: 0.06,
   cameraPush: 2.0,
+} as const;
+
+/**
+ * The tint inside the glass — one neutral, shared by every stone.
+ *
+ * This used to be the project's domain accent, which meant the twelve stones
+ * were twelve different colours: moss, brass, oxide, bone. At field scale it
+ * was a hairline of colour, but held up to the lens each stone became that
+ * colour, and the family stopped reading as one material. Domain still gets
+ * said — by the label rule and the panel eyebrow, in two dimensions, where a
+ * reader can attach it to a word. The stone itself stays stone.
+ */
+export const ATTENUATION_COLOR = ENVIRONMENT.graphite500;
+
+/**
+ * A presented stone closes up.
+ *
+ * DESIGN.md §6.3 has transmission going *up* on expansion, toward clear
+ * glass. That was written for a detail view that covered the field; this one
+ * writes on the stone itself, and text over a transparent body sitting in
+ * front of a moving starfield is text you can read half the time. So the
+ * stone goes opaque while it is being read and returns to glass on the way
+ * back — the one place in the field where clarity is spent rather than shown.
+ */
+export const SELECTED_TRANSMISSION = 0;
+
+/**
+ * The surface a presented stone turns into.
+ *
+ * Going opaque is only half of what makes the text readable. A pebble in the
+ * field is a piano-black finish — clearcoat 0.9, envMapIntensity 1.85 — and
+ * that finish throws a broad specular sweep diagonally across its face. Held
+ * at the lens it lands exactly where the title and the first line sit, and no
+ * amount of scrim under the type fixes a highlight that bright without also
+ * turning into a visible panel.
+ *
+ * So the stone goes matte while it is being read: the polish comes off, the
+ * environment stops being mirrored, and what is left is a slate the words can
+ * be cut into. It reverses on the way back, so the field keeps its gloss.
+ */
+export const PRESENTED_SURFACE = {
+  /*
+     A step darker than the field's graphite600.
+
+     Dropping envMapIntensity alone barely moved it: once a surface is matte
+     its tone comes from the *key light*, not from what it mirrors, and this
+     studio's key is bright by design. A dark body under a bright key still
+     lands at mid-grey, which is the worst possible ground for pale text. This
+     is the same neutral the whole family is cut from — the stone in shadow,
+     not a different stone.
+  */
+  bodyColor: ENVIRONMENT.graphite800,
+  roughness: 0.44,
+  clearcoat: 0.12,
+  /*
+     Held low. A matte surface takes its tone almost entirely from the
+     environment, and this studio is a bright one — at 0.62 the stone came up
+     a full step lighter than the graphite family it belongs to, and light
+     text on mid-grey is the worst of both. Darker keeps it the same stone and
+     gives the type something to sit against.
+  */
+  envMapIntensity: 0.34,
 } as const;
 
 export const UI_SPRING: TierSpring = {

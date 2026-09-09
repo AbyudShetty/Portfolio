@@ -4,7 +4,7 @@ import { Html } from "@react-three/drei";
 import { DOMAIN_ACCENT, DOMAIN_LABEL } from "@/lib/design-tokens";
 import type { Domain } from "./ProjectData";
 
-export type LabelState = "ambient" | "proximity" | "hover";
+export type LabelState = "ambient" | "proximity" | "hover" | "dimmed";
 
 /**
  * ProjectLabel — the identity of a real project, always legible.

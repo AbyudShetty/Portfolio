@@ -1,10 +1,12 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
+import { scroll } from "@/hooks/useScrollProgress";
+import { progressAt } from "./cameraChoreography";
+import { smoothstep01 } from "./reveal";
 
 /**
  * Starfield — depth, not subject.
@@ -22,7 +24,19 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
  * The shell follows the camera, so the journey never flies through it and the
  * stars behave as though at infinity.
  */
-const FAINT_COUNT = { 0: 4200, 1: 3000, 2: 1500, 3: 0 } as const;
+/**
+ * Constant, deliberately not tier-graded.
+ *
+ * Five point clouds cost five draw calls, no lighting and no depth writes —
+ * they are the cheapest thing in the scene by a wide margin, and nothing like
+ * where the frame budget actually goes (a 254k-triangle craft and a
+ * full-resolution transmission pass). Grading them by the live performance
+ * tier bought almost no frame time and cost the sky: a tier drop part-way
+ * through a scroll rebuilt every cloud with thousands fewer points, so stars
+ * visibly went out mid-journey. The background of every frame in the piece has
+ * to be stable, so the count is fixed.
+ */
+const FAINT_COUNT = 4200;
 const MID_RATIO = 0.16;
 const BRIGHT_RATIO = 0.028;
 const RADIUS = 180;
@@ -34,7 +48,25 @@ const RADIUS = 180;
  * feel rather than see, and it is what stops the sky reading as a flat
  * backdrop pasted behind the scene.
  */
-const FOLLOW = { faint: 0.994, clusters: 0.998, mid: 0.991, bright: 0.988 } as const;
+const FOLLOW = {
+  faint: 0.994,
+  clusters: 0.998,
+  mid: 0.991,
+  bright: 0.988,
+  deep: 0.9965,
+} as const;
+
+/**
+ * A deep field that fades up as the projects arrive.
+ *
+ * The project section is the widest, emptiest view in the piece — an overhead
+ * shot of twelve small stones — and the sparse hero sky leaves it looking thin.
+ * Rather than switch star counts (which would pop), a whole additional layer
+ * is faded in by opacity across the approach, so the sky simply deepens.
+ */
+const DEEP_COUNT = 3400;
+const DEEP_FADE = { start: progressAt(340), end: progressAt(560) };
+const DEEP_OPACITY = 0.62;
 
 /** A soft round point, generated rather than downloaded. */
 function makeStarTexture(): THREE.Texture {
@@ -157,23 +189,24 @@ function buildCloud(count: number, seedStart: number, bright: boolean) {
 export function Starfield() {
   const faintRef = useRef<THREE.Points>(null);
   const midRef = useRef<THREE.Points>(null);
+  const deepRef = useRef<THREE.Points>(null);
   const clusterRef = useRef<THREE.Points>(null);
   const brightRef = useRef<THREE.Points>(null);
   const camera = useThree((s) => s.camera);
-  const tier = usePerformanceTier();
-  const faintCount = FAINT_COUNT[tier];
-  const midCount = Math.round(faintCount * MID_RATIO);
-  const brightCount = Math.round(faintCount * BRIGHT_RATIO);
+  const midCount = Math.round(FAINT_COUNT * MID_RATIO);
+  const brightCount = Math.round(FAINT_COUNT * BRIGHT_RATIO);
 
   const {
     faint,
     mid,
     bright,
     clusters,
+    deep,
     faintMaterial,
     midMaterial,
     brightMaterial,
     clusterMaterial,
+    deepMaterial,
   } = useMemo(() => {
     const texture = makeStarTexture();
     const base = {
@@ -192,19 +225,64 @@ export function Starfield() {
       // neighbourhood look identical and the field reads as naturally
       // distributed rather than as scattered identical dots.
       return {
-        faint: buildCloud(faintCount, 20260908, false),
+        faint: buildCloud(FAINT_COUNT, 20260908, false),
         mid: buildCloud(midCount, 3390117, false),
         bright: buildCloud(brightCount, 771133, true),
-        clusters: buildClusters(Math.round(faintCount * 0.85), 5150231),
+        clusters: buildClusters(Math.round(FAINT_COUNT * 0.85), 5150231),
         faintMaterial: new THREE.PointsMaterial({ ...base, size: 1.25, opacity: 0.8 }),
         midMaterial: new THREE.PointsMaterial({ ...base, size: 1.9, opacity: 0.92 }),
         brightMaterial: new THREE.PointsMaterial({ ...base, size: 3.2, opacity: 1 }),
         clusterMaterial: new THREE.PointsMaterial({ ...base, size: 0.8, opacity: 0.6 }),
+        deep: buildCloud(DEEP_COUNT, 9182734, false),
+        deepMaterial: new THREE.PointsMaterial({ ...base, size: 1.05, opacity: 0 }),
       };
-    }, [faintCount, midCount, brightCount]);
+    }, [midCount, brightCount]);
+
+  useEffect(
+    () => () => {
+      for (const g of [faint, mid, bright, clusters, deep]) g.dispose();
+      for (const m of [
+        faintMaterial,
+        midMaterial,
+        brightMaterial,
+        clusterMaterial,
+        deepMaterial,
+      ]) {
+        m.map?.dispose();
+        m.dispose();
+      }
+    },
+    [
+      faint,
+      mid,
+      bright,
+      clusters,
+      deep,
+      faintMaterial,
+      midMaterial,
+      brightMaterial,
+      clusterMaterial,
+      deepMaterial,
+    ],
+  );
 
   useFrame(() => {
     const p = camera.position;
+
+    // Smooth ramp rather than a count change: opacity is continuous, star
+    // counts are not.
+    deepMaterial.opacity =
+      DEEP_OPACITY *
+      smoothstep01(
+        (scroll.progress - DEEP_FADE.start) / (DEEP_FADE.end - DEEP_FADE.start),
+      );
+    if (deepRef.current)
+      deepRef.current.position.set(
+        p.x * FOLLOW.deep,
+        p.y * FOLLOW.deep,
+        p.z * FOLLOW.deep,
+      );
+
     if (faintRef.current)
       faintRef.current.position.set(
         p.x * FOLLOW.faint,
@@ -231,8 +309,6 @@ export function Starfield() {
       );
   });
 
-  if (!faintCount) return null;
-
   return (
     <group renderOrder={-1}>
       <points
@@ -246,6 +322,13 @@ export function Starfield() {
         ref={clusterRef}
         geometry={clusters}
         material={clusterMaterial}
+        frustumCulled={false}
+        raycast={() => null}
+      />
+      <points
+        ref={deepRef}
+        geometry={deep}
+        material={deepMaterial}
         frustumCulled={false}
         raycast={() => null}
       />

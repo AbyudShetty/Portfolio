@@ -4,8 +4,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
-import { usePerformanceTier } from "@/hooks/usePerformanceTier";
-
 /**
  * Constellations — faint chart markings, meant to be found rather than seen.
  *
@@ -86,6 +84,45 @@ const FIGURES: {
     ],
   },
   {
+    /*
+      Ethylbenzene — a benzene ring with a two-carbon chain off one vertex.
+      Placed in the upper right of the hero frame, at roughly +17° right and
+      +13° above the opening camera's axis — moved further into the corner in
+      this pass so there is comfortable negative space between it and the
+      title, the profile links and the scroll cue.
+
+      Drawn to the same rules as every other figure here: same star size, same
+      line weight, same opacity. It reads as a constellation first — the
+      chemistry is there for anyone who looks twice, which is the point. No
+      label, no double bonds, no diagram conventions, and the vertices carry
+      the same small irregularities as the rest of the sky so it never looks
+      like something printed on top of the stars.
+    */
+    direction: [0.2855, 0.6618, -0.6932],
+    points: [
+      // Ring.
+      [2.28, 0.06],
+      [1.02, 1.98],
+      [-1.18, 1.86],
+      [-2.24, -0.08],
+      [-1.04, -1.94],
+      [1.14, -1.84],
+      // Ethyl chain.
+      [4.42, 1.06],
+      [6.52, 0.16],
+    ],
+    links: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 0],
+      [0, 6],
+      [6, 7],
+    ],
+  },
+  {
     // A small hook, low and to the left — the faintest.
     direction: [-0.84, -0.24, -0.49],
     points: [
@@ -123,7 +160,6 @@ function toSky(
 export function Constellations() {
   const group = useRef<THREE.Group>(null);
   const camera = useThree((s) => s.camera);
-  const tier = usePerformanceTier();
 
   const { lineGeometry, starGeometry } = useMemo(() => {
     const linePositions: number[] = [];
@@ -196,8 +232,6 @@ export function Constellations() {
     // Sits with the star shell at effective infinity.
     if (group.current) group.current.position.copy(camera.position);
   });
-
-  if (tier >= 2) return null;
 
   return (
     <group ref={group} renderOrder={-1}>

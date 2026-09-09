@@ -5,11 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
 import { ENVIRONMENT, SPACE } from "@/lib/design-tokens";
-import { attachPointerTracking } from "@/hooks/useFieldState";
+import { attachPointerTracking, fieldActions } from "@/hooks/useFieldState";
 import { PerformanceProvider } from "@/hooks/usePerformanceTier";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { scroll } from "@/hooks/useScrollProgress";
 import { ExperienceComposition } from "@/experience/ExperienceComposition";
+import { EnduranceSequence } from "@/experience/EnduranceSequence";
 import { AtmosphericPebbles } from "@/projects/AtmosphericPebbles";
 import { ProjectObject } from "@/projects/ProjectObject";
 import { PROJECT_OBJECTS, PROJECTS_BY_IMPORTANCE } from "@/projects/ProjectData";
@@ -69,14 +70,23 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
       setInteractive(true);
       return;
     }
-    let frame = 0;
-    const check = () => {
+    // Driven by the scroll event, not polled through requestAnimationFrame.
+    // useScrollProgress avoids rAF for exactly this reason: it stalls whenever
+    // the browser parks frames, and a poll that stalls here leaves the field
+    // permanently unclickable rather than merely late. Scroll events already
+    // fire at most once per frame, and `scroll.progress` is written by the
+    // hook's own listener, which is registered first.
+    const read = () => {
       const next = scroll.progress >= INSPECTION_PROGRESS;
       setInteractive((current) => (current === next ? current : next));
-      frame = requestAnimationFrame(check);
     };
-    frame = requestAnimationFrame(check);
-    return () => cancelAnimationFrame(frame);
+    read();
+    window.addEventListener("scroll", read, { passive: true });
+    window.addEventListener("resize", read, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", read);
+      window.removeEventListener("resize", read);
+    };
   }, [reducedMotion]);
 
   return (
@@ -95,6 +105,9 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
       <ScrollCameraRig reducedMotion={reducedMotion} />
 
       <ExperienceComposition reducedMotion={reducedMotion} />
+
+      {/* The Endurance, and the cable that stays attached after it has gone. */}
+      <EnduranceSequence reducedMotion={reducedMotion} />
 
       {/* Class B: distant, soft, unlabelled, non-interactive — and gone by the
           time the field settles, so the portfolio stands alone. */}
@@ -167,6 +180,11 @@ export function SpaceScene() {
             far: 400,
             position: CAMERA_KEYFRAMES[0].position,
           }}
+          // Clicking where no stone is puts the open one back. Handled here
+          // rather than with a full-bleed overlay: an overlay that catches
+          // the click is also an overlay that blocks the eleven other stones,
+          // which is precisely the jump this view exists to allow.
+          onPointerMissed={() => fieldActions.select(null)}
           onCreated={({ gl, scene, camera }) => {
             if (process.env.NODE_ENV !== "production") {
               // Dev-only handle for stepping frames by hand when the browser
@@ -177,6 +195,7 @@ export function SpaceScene() {
                 camera,
                 advance,
                 scroll,
+                fieldActions,
                 staticProgress: STATIC_FRAME_PROGRESS,
               };
             }

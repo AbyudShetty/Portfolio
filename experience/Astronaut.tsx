@@ -1,6 +1,7 @@
 "use client";
 
 import { RoundedBox } from "@react-three/drei";
+import type React from "react";
 import { useMemo } from "react";
 import * as THREE from "three";
 
@@ -223,7 +224,12 @@ function Leg({
   );
 }
 
-export function Astronaut() {
+export function Astronaut({
+  socketRef,
+}: {
+  /** Receives the pack's tether socket so the cable can track it. */
+  socketRef?: React.Ref<THREE.Object3D>;
+}) {
   const m = useSuitMaterials();
 
   // Torso profile — shoulders wider than waist, lathed rather than a capsule.
@@ -340,9 +346,33 @@ export function Astronaut() {
       <Leg side={-1} materials={m} />
       <Leg side={1} materials={m} />
 
-      {/* ── Umbilical ────────────────────────────────────────────────── */}
-      <mesh position={[0.26, 0.1, -0.4]} rotation={[0.95, 0.25, 0.45]} material={m.dark}>
-        <cylinderGeometry args={[0.018, 0.034, 1.6, 14]} />
+      {/* ── Tether socket ────────────────────────────────────────────────
+        An empty transform rather than geometry: the cable is a separate
+        object that needs the pack connector's world position every frame, and
+        parenting the socket here means it inherits the figure's pose and
+        scale for free.
+
+        This replaces a long tapered cylinder that used to trail from the
+        pack. It was meant to read as an umbilical and instead read as a rod
+        stuck to the model — a real cable meeting a real socket is what that
+        idea actually wanted to be.
+      */}
+      <object3D ref={socketRef} position={[0.04, 0.34, -0.46]} />
+
+      {/* Connector housing, so the cable terminates in hardware. */}
+      <mesh
+        position={[0.04, 0.34, -0.4]}
+        rotation={[Math.PI / 2, 0, 0]}
+        material={m.hardware}
+      >
+        <cylinderGeometry args={[0.062, 0.07, 0.1, 16]} />
+      </mesh>
+      <mesh
+        position={[0.04, 0.34, -0.45]}
+        rotation={[Math.PI / 2, 0, 0]}
+        material={m.dark}
+      >
+        <torusGeometry args={[0.062, 0.015, 8, 20]} />
       </mesh>
     </group>
   );

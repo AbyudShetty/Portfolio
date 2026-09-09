@@ -50,7 +50,35 @@ function displace(v: THREE.Vector3, p: number[]): number {
   );
 }
 
-function buildPebble(id: string): THREE.BufferGeometry {
+/**
+ * A stone and the direction its broad face looks in.
+ *
+ * The flattening happens along local Y, and then three seeded rotations bake
+ * a settle angle straight into the geometry — so by the time a pebble reaches
+ * a component, which way is "flat" has been lost. The specimen view needs it
+ * back: to hold a stone up to the lens you have to know which face to turn.
+ * It is far cheaper to record the normal while the rotations are being
+ * applied than to recover it afterwards from the vertices.
+ */
+export interface Pebble {
+  geometry: THREE.BufferGeometry;
+  /** Unit normal of the flat face, in the geometry's own space. */
+  faceNormal: THREE.Vector3;
+  /**
+   * Centre of the stone's bounding box, in its own space.
+   *
+   * Not the origin. Three displacement lobes and a settle rotation push the
+   * mass off centre by a tenth of a unit or so, differently for every stone.
+   * In the field that is exactly the wanted irregularity; at the lens it is
+   * not, because it means each project's silhouette sits somewhere slightly
+   * different behind a panel that is always in the same place. Subtracting
+   * this centres what the reader actually sees rather than what the transform
+   * says is there.
+   */
+  centre: THREE.Vector3;
+}
+
+function buildPebble(id: string): Pebble {
   const random = makeRandom(seedFromId(id));
   const phases = Array.from({ length: 6 }, () => random() * Math.PI * 2);
 
@@ -76,22 +104,53 @@ function buildPebble(id: string): THREE.BufferGeometry {
   );
 
   // Its own settle angle, as though it came to rest that way.
-  geometry.rotateY(random() * Math.PI * 2);
-  geometry.rotateZ((random() - 0.5) * 0.5);
-  geometry.rotateX((random() - 0.5) * 0.35);
+  const settleY = random() * Math.PI * 2;
+  const settleZ = (random() - 0.5) * 0.5;
+  const settleX = (random() - 0.5) * 0.35;
+  geometry.rotateY(settleY);
+  geometry.rotateZ(settleZ);
+  geometry.rotateX(settleX);
 
   geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
-  return geometry;
+  geometry.computeBoundingBox();
+  const centre = new THREE.Vector3();
+  geometry.boundingBox!.getCenter(centre);
+
+  // The face started as +Y. The Y rotation spins the stone about that axis
+  // and so leaves it alone; only the Z and X settles tip it, in that order.
+  const faceNormal = new THREE.Vector3(0, 1, 0)
+    .applyAxisAngle(AXIS_Z, settleZ)
+    .applyAxisAngle(AXIS_X, settleX)
+    .normalize();
+
+  return { geometry, faceNormal, centre };
 }
 
-const cache = new Map<string, THREE.BufferGeometry>();
+const AXIS_Z = new THREE.Vector3(0, 0, 1);
+const AXIS_X = new THREE.Vector3(1, 0, 0);
+
+const cache = new Map<string, Pebble>();
+
+function getPebble(id: string): Pebble {
+  let pebble = cache.get(id);
+  if (!pebble) {
+    pebble = buildPebble(id);
+    cache.set(id, pebble);
+  }
+  return pebble;
+}
 
 export function getPebbleGeometry(id: string): THREE.BufferGeometry {
-  let geometry = cache.get(id);
-  if (!geometry) {
-    geometry = buildPebble(id);
-    cache.set(id, geometry);
-  }
-  return geometry;
+  return getPebble(id).geometry;
+}
+
+/** Unit normal of the stone's broad face, in its own space. */
+export function getPebbleFaceNormal(id: string): THREE.Vector3 {
+  return getPebble(id).faceNormal;
+}
+
+/** Centre of the stone's bounding box, in its own space. */
+export function getPebbleCentre(id: string): THREE.Vector3 {
+  return getPebble(id).centre;
 }
