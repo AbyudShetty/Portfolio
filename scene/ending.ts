@@ -53,7 +53,29 @@ export const ENDING = {
    * the black hole leaves as it arrives.
    */
   holeFade: { start: at(360), end: at(410) },
+  /** Out of the dark, the tesseract unfolds around the camera. */
+  tesseractIn: { start: at(390), end: at(480) },
+  /** Scrolling on: down the corridor and into a room. */
+  room: { start: at(490), end: at(630) },
+  /** The room's light rises to fill the frame by the bottom of the page. */
+  roomLight: { start: at(575), end: at(640) },
 } as const;
+
+/* ── The tesseract ──────────────────────────────────────────────────────── */
+
+/** Where the dive into the black hole ends: ~3.75 horizon radii out. */
+export const DIVE_CAMERA = new THREE.Vector3(-76.5, 5.9, -56.8);
+
+/**
+ * The camera keeps drifting inward through the tesseract, four units further
+ * down the same line of sight, and comes to rest here at the end of the page.
+ * The tesseract is built in this camera's own frame (-Z ahead, +Y up), so its
+ * corridors run straight to the centre of the screen.
+ */
+export const TESSERACT_CAMERA = DIVE_CAMERA.clone().addScaledVector(
+  new THREE.Vector3(-84, 4, -66).sub(DIVE_CAMERA).normalize(),
+  4,
+);
 
 export function windowProgress(
   progress: number,

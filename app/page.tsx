@@ -10,6 +10,7 @@ import {
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
 import { useIsMobile, useMounted } from "@/hooks/useViewport";
+import { useReliveAtEnd } from "@/ui/relive";
 import { FieldFallback } from "@/ui/FieldFallback";
 import { InstrumentCursor } from "@/ui/InstrumentCursor";
 import { MobileNarrative } from "@/ui/MobileNarrative";
@@ -47,6 +48,10 @@ export default function Page() {
   const activeSection = useScrollProgress();
   const [capable, setCapable] = useState<boolean | null>(null);
 
+  // The bottom of the page is a room of the tesseract; arriving there
+  // returns the reader to the beginning.
+  useReliveAtEnd(mounted && !isMobile);
+
   useEffect(() => {
     setCapable(detectWebGLSupport() && !prefersSaveData());
   }, []);
@@ -60,6 +65,7 @@ export default function Page() {
         {/* The list is the only way in here, and it selects — so the panel
             has to exist on this path too, or the tap does nothing. */}
         <SpecimenPanel reducedMotion={reducedMotion} />
+        <div className="relive-flash" aria-hidden="true" />
       </main>
     );
   }
@@ -103,6 +109,7 @@ export default function Page() {
 
       <InstrumentCursor />
       <div className="grain" aria-hidden="true" />
+      <div className="relive-flash" aria-hidden="true" />
     </main>
   );
 }

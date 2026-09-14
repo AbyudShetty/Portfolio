@@ -16,6 +16,7 @@ import { scroll } from "@/hooks/useScrollProgress";
 import { ExperienceComposition } from "@/experience/ExperienceComposition";
 import { EnduranceSequence } from "@/experience/EnduranceSequence";
 import { BlackHole } from "@/experience/BlackHole";
+import { Tesseract } from "@/experience/Tesseract";
 import { ENDING } from "./ending";
 import { AtmosphericPebbles } from "@/projects/AtmosphericPebbles";
 import { ProjectObject } from "@/projects/ProjectObject";
@@ -124,6 +125,9 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
 
       {/* The ending: traced in a shader, nothing to load. */}
       <BlackHole reducedMotion={reducedMotion} />
+
+      {/* Inside it: the lattice, and the moments that lead back to the start. */}
+      <Tesseract reducedMotion={reducedMotion} />
 
       {/* Class B: distant, soft, unlabelled, non-interactive — and gone by the
           time the field settles, so the portfolio stands alone. */}

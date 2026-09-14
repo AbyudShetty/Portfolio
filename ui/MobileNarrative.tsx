@@ -4,6 +4,7 @@ import { EXPERIENCE_RECORD } from "@/projects/ProjectData";
 import { ProjectList } from "@/ui/ProjectList";
 import { AboutContent } from "@/ui/sections/AboutSection";
 import { SOCIALS } from "@/ui/sections/NarrativeSections";
+import { relive } from "@/ui/relive";
 
 /**
  * MobileNarrative — the same three sections, told without the camera.
@@ -73,6 +74,13 @@ export function MobileNarrative() {
             </a>
           ))}
         </nav>
+        <button
+          type="button"
+          className="landing__link credits__relive-mobile"
+          onClick={relive}
+        >
+          Relive it from the beginning
+        </button>
       </section>
     </div>
   );

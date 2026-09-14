@@ -118,9 +118,9 @@ export function ExperienceSection() {
 }
 
 /**
- * The closing credits — the landing again, after everything has gone into the
- * black hole. Same name, same two links, set in the landing's own styles, and
- * nothing else: the page ends where it began.
+ * The ending — scroll room only. Nothing is written here: the black hole, the
+ * tesseract and the room at the end of it are the scene's alone, and reaching
+ * the bottom returns the reader to the top (ui/relive.ts).
  */
 export function EndingSection() {
   return (
@@ -128,29 +128,8 @@ export function EndingSection() {
       id="ending"
       className="section section--ending"
       style={{ height: `${SECTION_VH.ending}vh` }}
-      aria-labelledby="credits-heading"
-    >
-      <div className="section__sticky credits">
-        <h2 id="credits-heading" className="landing__name">
-          Abyud Shetty
-        </h2>
-        <div className="landing__meta">
-          <nav className="landing__links" aria-label="Profiles">
-            {SOCIALS.map((social) => (
-              <a
-                key={social.label}
-                className="landing__link"
-                href={social.href}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                {social.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </div>
-    </section>
+      aria-hidden="true"
+    />
   );
 }
 

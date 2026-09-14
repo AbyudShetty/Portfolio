@@ -245,16 +245,34 @@ body[data-custom-cursor="true"] * {
   transform-origin: left;
 }
 
-/*
-   Credits — the landing, returned. The ending section's scroll runs 1060vh →
-   1410vh of document (its local progress tops out at ~0.78 at the page's
-   end). The camera dives into the black hole, which finishes fading at ~0.69; the
-   name arrives just after, by ~0.76, and holds to the bottom of the page.
-*/
-.credits {
-  justify-items: center;
-  text-align: center;
-  opacity: clamp(0, calc((var(--p-ending) - 0.69) / 0.07), 1);
+.credits__relive-mobile {
+  margin-top: 20px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* The way back: light rises over the page, the page returns to its first
+   frame behind it, and the light falls away (ui/relive.ts). */
+.relive-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    #fff8ec 0%,
+    #f1d3a4 30%,
+    #b9773c 62%,
+    #050607 100%
+  );
+  transition: opacity 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+:root[data-relive="in"] .relive-flash {
+  opacity: 1;
+  transition: opacity 0.52s cubic-bezier(0.6, 0, 0.9, 0.4);
 }
 
 .landing__cue {

@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { damp } from "@/lib/spring";
 import { pointer, readout } from "@/hooks/useFieldState";
 import { useFrameReporter } from "@/hooks/usePerformanceTier";
-import { scroll } from "@/hooks/useScrollProgress";
+import { cameraSnap, scroll } from "@/hooks/useScrollProgress";
 import {
   STATIC_FRAME_PROGRESS,
   sampleCamera,
@@ -47,6 +47,10 @@ export function ScrollCameraRig({
     const progress = reducedMotion ? STATIC_FRAME_PROGRESS : scroll.progress;
     const sampled = sampleCamera(progress);
     const state = current.current;
+    if (cameraSnap.pending) {
+      cameraSnap.pending = false;
+      state.initialised = false;
+    }
 
     if (!state.initialised || reducedMotion) {
       state.position.set(...sampled.position);

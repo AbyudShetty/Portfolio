@@ -40,6 +40,12 @@ export const scroll = {
   active: "landing" as SectionId,
 };
 
+/**
+ * Set when the page is jumped rather than scrolled (ui/relive.ts): the camera
+ * cuts to where the page now is instead of flying the whole distance.
+ */
+export const cameraSnap = { pending: false };
+
 function clamp01(v: number): number {
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }

@@ -24,12 +24,13 @@ export const SECTION_VH = {
   experience: 260,
   projects: 420,
   /**
-   * The ending: the field is pulled into a black hole and the page closes on
-   * the name again. Its scroll begins where the field's final frame is
-   * reached (960vh), not where this DOM section starts, so the project
-   * ending plays exactly as it did before this section existed.
+   * The ending: the field is pulled into a black hole, the camera falls
+   * through it into the tesseract and on into one of its rooms, and the
+   * page begins again (ui/relive.ts). Its scroll begins where the field's
+   * final frame is reached (960vh), not where this DOM section starts, so
+   * the project ending plays exactly as it did before this section existed.
    */
-  ending: 450,
+  ending: 640,
 } as const;
 
 export type SectionId = keyof typeof SECTION_VH;
@@ -144,14 +145,16 @@ export const CAMERA_KEYFRAMES: CameraKeyframe[] = [
   // The black hole, framed: see HOLE in scene/ending.ts for how this was solved.
   { at: progressAt(1170), position: [-40, 15, -12], target: [-84, 0.5, -66] },
 
-  // A slow push in while everything falls, settling onto the centre.
-  { at: progressAt(1260), position: [-43, 14.6, -16], target: [-84, 3, -66] },
-
-  // Then into it: straight down the same line of sight to ~3.75 horizon
-  // radii, where the shadow is wider than the frame is tall. The black hole
-  // fades out around the camera as it arrives, and the credits come up.
+  // Into it, from the moment the spiralling is on screen: one continuous dive
+  // while everything falls, down to ~3.75 horizon radii, where the shadow is
+  // wider than the frame is tall. The black hole fades out around the camera
+  // as it arrives.
   { at: progressAt(1345), position: [-76.5, 5.9, -56.8], target: [-84, 4, -66] },
-  { at: progressAt(1410), position: [-76.5, 5.9, -56.8], target: [-84, 4, -66] },
+
+  // Through it, into the tesseract: still drifting down the same line of
+  // sight to TESSERACT_CAMERA at the end of the page. The journey into a
+  // room is the tesseract moving around the camera (experience/Tesseract).
+  { at: progressAt(1600), position: [-78.996, 5.268, -59.86], target: [-84, 4, -66] },
 ];
 
 /** Smoothstep — removes the velocity discontinuity at every keyframe. */
