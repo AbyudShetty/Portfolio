@@ -156,6 +156,17 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
         </ul>
 
         <footer className="specimen__foot">
+          {/* On desktop the link is engraved on the stone; this is the same
+              link for screen readers and the keyboard. Hidden on mobile,
+              where the visible footer below carries it. */}
+          <a
+            className="specimen__repo"
+            href={repoUrl(record)}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {repoUrl(record).replace(/^https?:\/\//, "")}
+          </a>
           {record.status.length > 0 ? (
             <p className="specimen__status">
               {record.status.map((s) => s.label).join(" · ")}
@@ -188,7 +199,7 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
       <div className="specimen__footer">
         <div className="specimen__actions">
           <a
-            className="specimen__link"
+            className="specimen__link specimen__link--repo"
             href={repoUrl(record)}
             target="_blank"
             rel="noreferrer noopener"

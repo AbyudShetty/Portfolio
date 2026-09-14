@@ -56,7 +56,11 @@ export function AboutContent({ staged }: { staged: boolean }) {
               key={stop.place}
               className="timeline__item"
               data-current={"current" in stop && stop.current ? "true" : "false"}
-              style={beat(0.13 + index * 0.045)}
+              // Listed newest first but arriving oldest first, bottom up,
+              // as the line draws toward the present.
+              style={beat(
+                0.13 + (ABOUT.education.length - 1 - index) * 0.045,
+              )}
             >
               <span className="timeline__years">{stop.years}</span>
               <span className="timeline__place">

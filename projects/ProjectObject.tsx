@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -28,6 +28,7 @@ import {
   getEngravingGeometry,
   getEngravingTextures,
   getFaceFrame,
+  type EngravingLink,
 } from "./engraving";
 import { ProjectLabel, type LabelState } from "./ProjectLabel";
 import {
@@ -153,7 +154,42 @@ export function ProjectObject({
   const [engraving, setEngraving] = useState<{
     geometry: THREE.BufferGeometry;
     material: THREE.MeshStandardMaterial;
+    link: EngravingLink;
   } | null>(null);
+  const decal = useRef<THREE.Mesh>(null);
+  const overLink = useRef(false);
+
+  /*
+    Whether the pointer is on the engraved repository link.
+
+    The decal lies exactly on the stone's surface, so which of the two a ray
+    reaches first is a coin toss. Rather than race them, the stone's own
+    handlers look through every intersection for the decal and read its UV:
+    on the link, the click opens the repository; anywhere else it does what a
+    click on the stone always did. Only once the words are fully cut in.
+  */
+  const linkUnder = (e: ThreeEvent<PointerEvent | MouseEvent>): boolean => {
+    if (!engraving || !isSelected || engraving.material.opacity < 0.9) {
+      return false;
+    }
+    const hit = e.intersections.find((i) => i.object === decal.current);
+    const uv = hit?.uv;
+    if (!uv) return false;
+    const l = engraving.link;
+    return uv.x >= l.u0 && uv.x <= l.u1 && uv.y >= l.v0 && uv.y <= l.v1;
+  };
+  const setOverLink = (over: boolean) => {
+    if (over === overLink.current) return;
+    overLink.current = over;
+    // The native cursor is hidden behind the instrument reticle, so the
+    // reticle is what says "this opens": see .cursor in SpecimenPanel.css.
+    document.body.style.cursor = over ? "pointer" : "";
+    if (over) document.body.dataset.cursorLink = "true";
+    else delete document.body.dataset.cursorLink;
+  };
+  useEffect(() => {
+    if (!isSelected) setOverLink(false);
+  });
   useEffect(() => {
     if (!isSelected || engraving) return;
     let cancelled = false;
@@ -163,6 +199,7 @@ export function ProjectObject({
         setEngraving({
           geometry: getEngravingGeometry(record.id),
           material: createEngravingMaterial(textures),
+          link: textures.link,
         });
       },
     );
@@ -494,10 +531,16 @@ export function ProjectObject({
         onPointerOut={(e) => {
           e.stopPropagation();
           fieldActions.hover(null);
+          setOverLink(false);
         }}
+        onPointerMove={(e) => setOverLink(linkUnder(e))}
         onClick={(e) => {
           if (!interactive) return;
           e.stopPropagation();
+          if (linkUnder(e)) {
+            window.open(engraving!.link.url, "_blank", "noopener,noreferrer");
+            return;
+          }
           // Clicking the stone already at the lens puts it back. Clicking any
           // other one jumps straight to it, without closing first — moving
           // through the field is the point, not returning to it each time.
@@ -527,8 +570,12 @@ export function ProjectObject({
         <mesh
           geometry={engraving.geometry}
           material={engraving.material}
+          ref={decal}
           renderOrder={3}
-          raycast={NO_RAYCAST}
+          // Raycast, with a handler that does nothing, only so it appears in
+          // the stone's intersections (see linkUnder). It never stops a click.
+          raycast={isSelected ? MESH_RAYCAST : NO_RAYCAST}
+          onPointerMove={() => undefined}
         />
       ) : null}
 

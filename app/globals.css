@@ -999,7 +999,7 @@ body[data-custom-cursor="true"] * {
 */
 @media (min-width: 768px) {
   :root {
-    --ui-scale: 0.8;
+    --ui-scale: 0.9;
   }
 
   .section__sticky > *,

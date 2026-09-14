@@ -620,3 +620,25 @@
     transform: none;
   }
 }
+
+/* ── The repository link ─────────────────────────────────────────────────
+   Engraved on the stone on desktop (projects/engraving.ts), so the footer's
+   copy goes; mobile has no stone and keeps it. The panel's own copy is for
+   assistive tech on desktop and would only duplicate the footer on mobile. */
+@media (min-width: 721px) {
+  .specimen__link--repo {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .specimen__repo {
+    display: none;
+  }
+}
+
+/* Over the engraved link, the reticle takes the signal colour. */
+body[data-cursor-link="true"] .cursor__ring {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px var(--signal-wash);
+}

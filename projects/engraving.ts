@@ -36,7 +36,7 @@ import {
   getPebbleFaceNormal,
   getPebbleGeometry,
 } from "./projectGeometry";
-import type { ProjectRecord } from "./ProjectData";
+import { repoUrl, type ProjectRecord } from "./ProjectData";
 
 /**
  * The engraved field, in the stone's own units (before the presentation
@@ -153,9 +153,29 @@ export function getEngravingGeometry(id: string): THREE.BufferGeometry {
 
 /* ── Textures ────────────────────────────────────────────────────────────── */
 
+/**
+ * Where the engraved repository link sits on the decal, in its UVs (v up), so
+ * a click on the stone can tell whether it landed on the link.
+ */
+export interface EngravingLink {
+  url: string;
+  u0: number;
+  u1: number;
+  v0: number;
+  v1: number;
+}
+
 export interface EngravingTextures {
   map: THREE.CanvasTexture;
   bump: THREE.CanvasTexture;
+  link: EngravingLink;
+}
+
+interface LinkRect {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
 }
 
 type Run =
@@ -203,7 +223,7 @@ function layout(
   record: ProjectRecord,
   fonts: { serif: string; sans: string; mono: string; text: string },
   scale: number,
-): { runs: Run[]; height: number } {
+): { runs: Run[]; height: number; link: LinkRect } {
   const runs: Run[] = [];
   const maxWidth = CANVAS_W - PAD_X * 2;
   let y = 0;
@@ -312,7 +332,44 @@ function layout(
     });
   }
 
-  return { runs, height: y + Math.round(stackSize * 0.4) };
+  // The repository, cut as the last line with a scored rule beneath it — the
+  // stone's own way out to the code. Pale, unlike the orange labelling, so it
+  // reads as the one thing on the face that can be acted on.
+  const linkSize = Math.round(36 * scale);
+  const linkFont = `500 ${linkSize}px ${fonts.mono}`;
+  const linkTracking = 2 * scale;
+  setFont(linkFont, linkTracking);
+  y += Math.round(64 * scale);
+  const linkText = `${repoUrl(record).replace(/^https?:\/\//, "")}  ↗`;
+  const linkWidth = Math.min(maxWidth, Math.ceil(ctx.measureText(linkText).width));
+  runs.push({
+    kind: "text",
+    text: linkText,
+    font: linkFont,
+    tracking: linkTracking,
+    x: PAD_X,
+    y,
+    tone: "#E3E6E9",
+  });
+  const ruleH = Math.max(2, Math.round(3 * scale));
+  runs.push({
+    kind: "rule",
+    x: PAD_X,
+    y: y + Math.round(14 * scale),
+    w: linkWidth,
+    h: ruleH,
+    tone: "rgba(232, 132, 60, 0.9)",
+  });
+
+  // Generous around the letters: it is a target on a moving, curved stone.
+  const link: LinkRect = {
+    x0: PAD_X - 24,
+    x1: PAD_X + linkWidth + 24,
+    y0: y - linkSize - Math.round(18 * scale),
+    y1: y + Math.round(30 * scale),
+  };
+
+  return { runs, height: y + Math.round(24 * scale), link };
 }
 
 function paint(
@@ -410,7 +467,17 @@ export function getEngravingTextures(
     map.anisotropy = anisotropy;
     const bump = new THREE.CanvasTexture(height);
     bump.anisotropy = anisotropy;
-    return { map, bump };
+
+    // Canvas y runs down; decal v runs up (the texture is flipped on upload).
+    const rect = block.link;
+    const link: EngravingLink = {
+      url: repoUrl(record),
+      u0: rect.x0 / CANVAS_W,
+      u1: rect.x1 / CANVAS_W,
+      v0: 1 - (rect.y1 + offsetY) / CANVAS_H,
+      v1: 1 - (rect.y0 + offsetY) / CANVAS_H,
+    };
+    return { map, bump, link };
   })();
 
   textures.set(record.id, built);

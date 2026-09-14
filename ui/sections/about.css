@@ -104,25 +104,37 @@
   list-style: none;
 }
 
-/* The line draws downward as the stops arrive, ending in signal at "now". */
-.timeline::before {
+/*
+   The line draws upward as the stops arrive — from school at the bottom to
+   "now" at the top, ending in signal. It is drawn in segments, one per gap
+   between stops, so it runs exactly dot to dot however tall a stop is (PES
+   carries its coursework). The lower gap draws first, then the upper.
+*/
+.timeline__item:not(:last-child)::after {
   content: "";
   position: absolute;
-  left: 4px;
-  top: 7px;
-  bottom: 7px;
+  left: -22px;
+  top: 12px;
+  /* Down through the gap to the next stop's dot. */
+  bottom: -29px;
   width: 1px;
-  background: linear-gradient(
-    to bottom,
-    var(--graphite-400),
-    var(--edge-active) 60%,
-    var(--signal)
-  );
-  transform-origin: top;
-  transform: scaleY(var(--draw));
+  transform-origin: bottom;
+  transform: scaleY(var(--segment));
 }
 
-.about__grid[data-staged="false"] .timeline::before {
+/* Upper gap: PES ← PU. */
+.timeline__item:nth-child(1)::after {
+  --segment: clamp(0, calc(var(--draw) * 2 - 1), 1);
+  background: linear-gradient(to top, var(--edge-active), var(--signal));
+}
+
+/* Lower gap: PU ← Presidency. */
+.timeline__item:nth-child(2)::after {
+  --segment: clamp(0, calc(var(--draw) * 2), 1);
+  background: linear-gradient(to top, var(--graphite-400), var(--edge-active));
+}
+
+.about__grid[data-staged="false"] .timeline__item::after {
   transform: none;
 }
 
