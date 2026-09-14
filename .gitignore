@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# assets
+/assets
+
 # production
 /build
 
