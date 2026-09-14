@@ -621,12 +621,14 @@
   }
 }
 
-/* ── The repository link ─────────────────────────────────────────────────
-   Engraved on the stone on desktop (projects/engraving.ts), so the footer's
-   copy goes; mobile has no stone and keeps it. The panel's own copy is for
+/* ── Repository and live-demo links ──────────────────────────────────────
+   Engraved on the stone on desktop as marks beside the name
+   (projects/engraving.ts), so the footer's copies go; mobile has no stone
+   and keeps them. The panel's own copy is for
    assistive tech on desktop and would only duplicate the footer on mobile. */
 @media (min-width: 721px) {
-  .specimen__link--repo {
+  .specimen__link--repo,
+  .specimen__link--demo {
     display: none;
   }
 }

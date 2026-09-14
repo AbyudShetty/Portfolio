@@ -158,6 +158,7 @@ export function getEngravingGeometry(id: string): THREE.BufferGeometry {
  * a click on the stone can tell whether it landed on the link.
  */
 export interface EngravingLink {
+  kind: "repo" | "demo";
   url: string;
   u0: number;
   u1: number;
@@ -168,10 +169,12 @@ export interface EngravingLink {
 export interface EngravingTextures {
   map: THREE.CanvasTexture;
   bump: THREE.CanvasTexture;
-  link: EngravingLink;
+  links: EngravingLink[];
 }
 
 interface LinkRect {
+  kind: EngravingLink["kind"];
+  url: string;
   x0: number;
   x1: number;
   y0: number;
@@ -188,7 +191,36 @@ type Run =
       y: number;
       tone: string;
     }
-  | { kind: "rule"; x: number; y: number; w: number; h: number; tone: string };
+  | { kind: "rule"; x: number; y: number; w: number; h: number; tone: string }
+  | {
+      kind: "icon";
+      icon: EngravingLink["kind"];
+      /** Top-left of the icon's square. */
+      x: number;
+      y: number;
+      size: number;
+      tone: string;
+    };
+
+/*
+  The marks, as 16-unit paths (GitHub Octicons, MIT): the GitHub mark for the
+  repository, and a globe for a live site. Built on first use — Path2D does
+  not exist outside the browser.
+*/
+const ICON_PATHS: Record<EngravingLink["kind"], string> = {
+  repo: "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z",
+  demo: "M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM5.78 8.75a9.64 9.64 0 0 0 1.363 4.177c.255.426.542.832.857 1.215.245-.296.551-.705.857-1.215A9.64 9.64 0 0 0 10.22 8.75Zm4.44-1.5a9.64 9.64 0 0 0-1.363-4.177c-.307-.51-.612-.919-.857-1.215a9.927 9.927 0 0 0-.857 1.215A9.64 9.64 0 0 0 5.78 7.25Zm-5.944 1.5H1.543a6.507 6.507 0 0 0 4.666 5.5c-.123-.181-.24-.365-.352-.552-.715-1.192-1.437-2.874-1.581-4.948Zm-2.733-1.5h2.733c.144-2.074.866-3.756 1.58-4.948.12-.197.237-.381.353-.552a6.507 6.507 0 0 0-4.666 5.5Zm10.181 1.5c-.144 2.074-.866 3.756-1.58 4.948-.12.197-.237.381-.353.552a6.507 6.507 0 0 0 4.666-5.5Zm2.733-1.5a6.507 6.507 0 0 0-4.666-5.5c.123.181.24.365.353.552.714 1.192 1.436 2.874 1.58 4.948Z",
+};
+
+const iconPaths = new Map<EngravingLink["kind"], Path2D>();
+function iconPath(kind: EngravingLink["kind"]): Path2D {
+  let path = iconPaths.get(kind);
+  if (!path) {
+    path = new Path2D(ICON_PATHS[kind]);
+    iconPaths.set(kind, path);
+  }
+  return path;
+}
 
 /** The loaded next/font family for a CSS variable, with a real fallback. */
 function family(variable: string, fallback: string): string {
@@ -223,7 +255,7 @@ function layout(
   record: ProjectRecord,
   fonts: { serif: string; sans: string; mono: string; text: string },
   scale: number,
-): { runs: Run[]; height: number; link: LinkRect } {
+): { runs: Run[]; height: number; links: LinkRect[] } {
   const runs: Run[] = [];
   const maxWidth = CANVAS_W - PAD_X * 2;
   let y = 0;
@@ -248,12 +280,23 @@ function layout(
     tone: SIGNAL.base,
   });
 
-  // Title.
+  // Title, followed by its marks: the GitHub mark, and a globe when there is
+  // a live site. They sit on the last line, centred on the capitals, sized to
+  // read as part of the name rather than as buttons beside it.
   const titleSize = Math.round(132 * scale);
   const titleFont = `${titleSize}px ${fonts.serif}`;
   setFont(titleFont, 0);
+  const marks: { kind: EngravingLink["kind"]; url: string }[] = [
+    { kind: "repo", url: repoUrl(record) },
+  ];
+  if (record.demo) marks.push({ kind: "demo", url: record.demo });
+  const iconSize = Math.round(titleSize * 0.44);
+  const iconGap = Math.round(titleSize * 0.3);
+  const marksWidth = marks.length * (iconSize + iconGap);
+  const links: LinkRect[] = [];
+  const titleLines = wrap(ctx, record.name, maxWidth - marksWidth);
   y += Math.round(26 * scale);
-  for (const line of wrap(ctx, record.name, maxWidth)) {
+  titleLines.forEach((line, index) => {
     y += Math.round(titleSize * 1.02);
     runs.push({
       kind: "text",
@@ -264,7 +307,31 @@ function layout(
       y,
       tone: "#E3E6E9",
     });
-  }
+    if (index !== titleLines.length - 1) return;
+    let x = PAD_X + Math.ceil(ctx.measureText(line).width) + iconGap;
+    const top = Math.round(y - titleSize * 0.34 - iconSize / 2);
+    // Generous targets: they sit on a moving, curved stone.
+    const pad = Math.round(iconSize * 0.4);
+    for (const mark of marks) {
+      runs.push({
+        kind: "icon",
+        icon: mark.kind,
+        x,
+        y: top,
+        size: iconSize,
+        tone: "#E3E6E9",
+      });
+      links.push({
+        kind: mark.kind,
+        url: mark.url,
+        x0: x - pad,
+        x1: x + iconSize + pad,
+        y0: top - pad,
+        y1: top + iconSize + pad,
+      });
+      x += iconSize + iconGap;
+    }
+  });
 
   // Points, each set off by a short scored rule.
   // Newsreader, a text serif, set a step larger than the grotesque it
@@ -332,44 +399,7 @@ function layout(
     });
   }
 
-  // The repository, cut as the last line with a scored rule beneath it — the
-  // stone's own way out to the code. Pale, unlike the orange labelling, so it
-  // reads as the one thing on the face that can be acted on.
-  const linkSize = Math.round(36 * scale);
-  const linkFont = `500 ${linkSize}px ${fonts.mono}`;
-  const linkTracking = 2 * scale;
-  setFont(linkFont, linkTracking);
-  y += Math.round(64 * scale);
-  const linkText = `${repoUrl(record).replace(/^https?:\/\//, "")}  ↗`;
-  const linkWidth = Math.min(maxWidth, Math.ceil(ctx.measureText(linkText).width));
-  runs.push({
-    kind: "text",
-    text: linkText,
-    font: linkFont,
-    tracking: linkTracking,
-    x: PAD_X,
-    y,
-    tone: "#E3E6E9",
-  });
-  const ruleH = Math.max(2, Math.round(3 * scale));
-  runs.push({
-    kind: "rule",
-    x: PAD_X,
-    y: y + Math.round(14 * scale),
-    w: linkWidth,
-    h: ruleH,
-    tone: "rgba(232, 132, 60, 0.9)",
-  });
-
-  // Generous around the letters: it is a target on a moving, curved stone.
-  const link: LinkRect = {
-    x0: PAD_X - 24,
-    x1: PAD_X + linkWidth + 24,
-    y0: y - linkSize - Math.round(18 * scale),
-    y1: y + Math.round(30 * scale),
-  };
-
-  return { runs, height: y + Math.round(24 * scale), link };
+  return { runs, height: y + Math.round(stackSize * 0.4), links };
 }
 
 function paint(
@@ -391,6 +421,30 @@ function paint(
 
   for (const run of runs) {
     const y = run.y + offsetY;
+    if (run.kind === "icon") {
+      const path = iconPath(run.icon);
+      const k = run.size / 16;
+      ctx.save();
+      if (mode === "height") {
+        ctx.translate(run.x, y);
+        ctx.scale(k, k);
+        ctx.fillStyle = "#000000";
+        ctx.fill(path);
+      } else {
+        // The same shadowed upper wall the letters are given.
+        ctx.translate(run.x - 1.5, y - 2.5);
+        ctx.scale(k, k);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.fill(path);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.translate(run.x, y);
+        ctx.scale(k, k);
+        ctx.fillStyle = run.tone;
+        ctx.fill(path);
+      }
+      ctx.restore();
+      continue;
+    }
     if (run.kind === "rule") {
       if (mode === "height") {
         ctx.fillStyle = "#000000";
@@ -469,15 +523,15 @@ export function getEngravingTextures(
     bump.anisotropy = anisotropy;
 
     // Canvas y runs down; decal v runs up (the texture is flipped on upload).
-    const rect = block.link;
-    const link: EngravingLink = {
-      url: repoUrl(record),
+    const links: EngravingLink[] = block.links.map((rect) => ({
+      kind: rect.kind,
+      url: rect.url,
       u0: rect.x0 / CANVAS_W,
       u1: rect.x1 / CANVAS_W,
       v0: 1 - (rect.y1 + offsetY) / CANVAS_H,
       v1: 1 - (rect.y0 + offsetY) / CANVAS_H,
-    };
-    return { map, bump, link };
+    }));
+    return { map, bump, links };
   })();
 
   textures.set(record.id, built);

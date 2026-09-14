@@ -165,8 +165,18 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
             target="_blank"
             rel="noreferrer noopener"
           >
-            {repoUrl(record).replace(/^https?:\/\//, "")}
+            GitHub repository
           </a>
+          {record.demo ? (
+            <a
+              className="specimen__repo"
+              href={record.demo}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Live demo
+            </a>
+          ) : null}
           {record.status.length > 0 ? (
             <p className="specimen__status">
               {record.status.map((s) => s.label).join(" · ")}
@@ -209,7 +219,7 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
           </a>
           {record.demo ? (
             <a
-              className="specimen__link"
+              className="specimen__link specimen__link--demo"
               href={record.demo}
               target="_blank"
               rel="noreferrer noopener"

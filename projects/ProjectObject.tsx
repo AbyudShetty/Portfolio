@@ -154,29 +154,35 @@ export function ProjectObject({
   const [engraving, setEngraving] = useState<{
     geometry: THREE.BufferGeometry;
     material: THREE.MeshStandardMaterial;
-    link: EngravingLink;
+    links: EngravingLink[];
   } | null>(null);
   const decal = useRef<THREE.Mesh>(null);
   const overLink = useRef(false);
 
   /*
-    Whether the pointer is on the engraved repository link.
+    Which engraved mark, if any, is under the pointer — the GitHub mark or a
+    live site's globe, set beside the project's name.
 
     The decal lies exactly on the stone's surface, so which of the two a ray
     reaches first is a coin toss. Rather than race them, the stone's own
     handlers look through every intersection for the decal and read its UV:
-    on the link, the click opens the repository; anywhere else it does what a
-    click on the stone always did. Only once the words are fully cut in.
+    on a mark, the click opens its link; anywhere else it does what a click on
+    the stone always did. Only once the words are fully cut in.
   */
-  const linkUnder = (e: ThreeEvent<PointerEvent | MouseEvent>): boolean => {
+  const linkUnder = (
+    e: ThreeEvent<PointerEvent | MouseEvent>,
+  ): EngravingLink | null => {
     if (!engraving || !isSelected || engraving.material.opacity < 0.9) {
-      return false;
+      return null;
     }
     const hit = e.intersections.find((i) => i.object === decal.current);
     const uv = hit?.uv;
-    if (!uv) return false;
-    const l = engraving.link;
-    return uv.x >= l.u0 && uv.x <= l.u1 && uv.y >= l.v0 && uv.y <= l.v1;
+    if (!uv) return null;
+    return (
+      engraving.links.find(
+        (l) => uv.x >= l.u0 && uv.x <= l.u1 && uv.y >= l.v0 && uv.y <= l.v1,
+      ) ?? null
+    );
   };
   const setOverLink = (over: boolean) => {
     if (over === overLink.current) return;
@@ -199,7 +205,7 @@ export function ProjectObject({
         setEngraving({
           geometry: getEngravingGeometry(record.id),
           material: createEngravingMaterial(textures),
-          link: textures.link,
+          links: textures.links,
         });
       },
     );
@@ -533,12 +539,13 @@ export function ProjectObject({
           fieldActions.hover(null);
           setOverLink(false);
         }}
-        onPointerMove={(e) => setOverLink(linkUnder(e))}
+        onPointerMove={(e) => setOverLink(linkUnder(e) !== null)}
         onClick={(e) => {
           if (!interactive) return;
           e.stopPropagation();
-          if (linkUnder(e)) {
-            window.open(engraving!.link.url, "_blank", "noopener,noreferrer");
+          const link = linkUnder(e);
+          if (link) {
+            window.open(link.url, "_blank", "noopener,noreferrer");
             return;
           }
           // Clicking the stone already at the lens puts it back. Clicking any
