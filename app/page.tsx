@@ -16,7 +16,9 @@ import { MobileNarrative } from "@/ui/MobileNarrative";
 import { ProjectList } from "@/ui/ProjectList";
 import { SpecimenPanel } from "@/ui/SpecimenPanel";
 import { TopRail } from "@/ui/TopRail";
+import { AboutSection } from "@/ui/sections/AboutSection";
 import {
+  EndingSection,
   ExperienceSection,
   LandingSection,
   ProjectsSection,
@@ -80,8 +82,10 @@ export default function Page() {
 
       <article className="narrative">
         <LandingSection />
+        <AboutSection />
         <ExperienceSection />
         <ProjectsSection />
+        <EndingSection />
       </article>
 
       {/* Reduced motion holds one composed frame instead of travelling, so the

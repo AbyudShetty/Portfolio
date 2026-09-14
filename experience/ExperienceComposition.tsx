@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { Suspense, useRef } from "react";
 import * as THREE from "three";
 
 import { scroll } from "@/hooks/useScrollProgress";
@@ -16,6 +16,13 @@ import {
   STATIC_MOMENT,
   windowProgress,
 } from "./sequence";
+import {
+  ASTRONAUT_ENDING_SCALE,
+  ASTRONAUT_ENTRY,
+  ENDING,
+  fallInto,
+  windowProgress as endingWindow,
+} from "@/scene/ending";
 
 /**
  * ExperienceComposition — the astronaut's place in the sequence.
@@ -36,7 +43,7 @@ export const ASTRONAUT_SCALE = 1.15;
 
 /**
  * Where the figure sits for most of the section: near the middle of frame,
- * still clear of the CAVE panel on the right.
+ * still clear of the CaveLabs panel on the right.
  */
 const HOLD_POSITION = new THREE.Vector3(0.4, 0.15, 0);
 
@@ -47,8 +54,17 @@ const HOLD_POSITION = new THREE.Vector3(0.4, 0.15, 0);
  */
 const HOLD_APPROACH = 1.6;
 
-/** How far right it floats before leaving, in world units. */
-const DRIFT_RIGHT = 1.9;
+/**
+ * How far right it floats before leaving, in world units.
+ *
+ * Cut from 1.9 when the Experience panel widened to 42rem and the model
+ * changed to the GLB, whose arms are held out from the body. Measured across
+ * the section, the figure's right edge crossed the panel's left edge from
+ * ~38% to ~60% of the section, by up to 248px at the midpoint, where one
+ * world unit of drift is ~258px on screen. Clearing that with a 40px margin
+ * needs ~1.1 units less; 0.6 leaves room for the approach enlarging it.
+ */
+const DRIFT_RIGHT = 0.6;
 
 /**
  * Exit target, in world space. Solved against the camera at the moment the
@@ -81,6 +97,27 @@ export function ExperienceComposition({
     const exit = reducedMotion
       ? 0
       : smoothstep01(windowProgress(progress, ASTRONAUT_EXIT));
+
+    // The ending: back on the tether, a beat behind the Endurance, and into
+    // the black hole after it.
+    const craftFall = reducedMotion ? 0 : endingWindow(progress, ENDING.craftFall);
+    if (craftFall > 0 && craftFall < 1) {
+      if (!g.visible) g.visible = true;
+      const size = fallInto(
+        g.position,
+        ASTRONAUT_ENTRY,
+        Math.max(0, craftFall - 0.04),
+        1.3,
+      );
+      g.scale.setScalar(ASTRONAUT_SCALE * ASTRONAUT_ENDING_SCALE * size);
+      settled.current = false;
+      if (socket.current) {
+        socket.current.getWorldPosition(anchors.astronaut);
+        anchors.astronautReady = size > 0.02;
+      }
+      if (size <= 0.002) g.visible = false;
+      return;
+    }
 
     // Absent from the hero, and gone once it has left the frame.
     if (enter <= 0.001 || exit >= 0.999) {
@@ -118,16 +155,24 @@ export function ExperienceComposition({
 
     // Publish the pack socket's live world position for the tether. Queried
     // from the scene graph each frame, so the cable stays attached through
-    // the arrival, the drift and the exit alike.
+    // the arrival, the drift and the exit alike. Until the model has loaded
+    // the socket does not exist yet, and the cable simply waits for it.
     if (socket.current) {
       socket.current.getWorldPosition(anchors.astronaut);
       anchors.astronautReady = enter > 0.05;
+    } else {
+      anchors.astronautReady = false;
     }
   });
 
   return (
     <group ref={group} visible={false}>
-      <Astronaut socketRef={socket} />
+      {/* Its own boundary: while the model streams in, only the figure waits
+          — without this, the suspension would reach the canvas root and blank
+          the whole scene. */}
+      <Suspense fallback={null}>
+        <Astronaut socketRef={socket} />
+      </Suspense>
     </group>
   );
 }

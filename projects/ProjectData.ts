@@ -15,6 +15,7 @@ export type Domain =
   | "research"
   | "ai"
   | "graphics"
+  | "simulation"
   | "xr"
   | "systems"
   | "product"
@@ -64,14 +65,21 @@ export interface ProjectRecord {
   /** One line, used by the label and the specimen panel's standfirst. */
   summary: string;
   /**
-   * Two or three points — what the specimen panel actually says.
+   * Four points — what is engraved on the stone.
    *
-   * Deliberately short. A stone held up to the lens is not a case study; it
-   * has room for the shape of the thing and the one detail worth knowing,
-   * and the repository is one click away for anyone who wants the rest.
-   * Every point here is traceable to PROJECT_INVENTORY.md.
+   * Written to be technically true and still readable by someone outside the
+   * field: each project opens with what it does for a person, then how. The
+   * engraving shrinks its type to fit, so these stay short enough to be read
+   * at the lens, and the repository is one click away for the rest. Every
+   * point here is traceable to PROJECT_INVENTORY.md.
    */
   points: string[];
+  /**
+   * A longer telling, as points, for a record that gets a full section of its
+   * own rather than a stone — today only the Experience. Technical, but
+   * written so someone outside the field can follow what happens end to end.
+   */
+  narrative?: string[];
   /** A deployed instance, where one exists and its URL is known. */
   demo?: string;
   stack: string[];
@@ -88,9 +96,16 @@ export const PROJECTS: ProjectRecord[] = [
     repo: "IMU-Reconstruction-SlimeVR",
     domain: "experience",
     tier: "experience",
-    org: "CAVE",
+    org: "CaveLabs",
     summary:
       "Ten body-worn ESP32 + MPU6050 nodes to a live 3D avatar: ESP-NOW to hubs, UDP to a Kotlin SlimeVR server solving IK, streamed over WebSocket to a Three.js viewer.",
+    narrative: [
+      "Full-body motion capture, built from the hardware up: ten sensor nodes, each an ESP32 microcontroller paired with an MPU6050 motion sensor, worn on the body.",
+      "Every node measures how its limb moves and turns, and reports to two hubs over ESP-NOW — a lightweight wireless link that needs no Wi-Fi router.",
+      "The hubs forward those readings over UDP to a SlimeVR server written in Kotlin, which solves inverse kinematics: ten sensors in, the pose of a whole skeleton out.",
+      "That pose streams over WebSocket to a Three.js viewer in the browser, where a rigged 3D character moves as the wearer moves.",
+      "The entire pipeline is containerised with Docker, so it goes from hardware to avatar with a single command.",
+    ],
     points: [
       "Ten body-worn ESP32 + MPU6050 nodes speak ESP-NOW to two hubs, which forward over UDP.",
       "A Kotlin/JVM SlimeVR server solves the IK skeleton and streams it on WebSocket to a Three.js viewer.",
@@ -111,9 +126,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Browser-based first-person viewer for Gaussian Splat captures of real campus locations. Pointer-lock navigation, configurable bounds, zero install.",
     points: [
-      "Renders .spz Gaussian Splat captures of real campus locations — a parking lot and an amphitheatre.",
-      "Pointer-lock first-person navigation, with configurable scene bounds.",
-      "Runs as a web page. No install, no plugin, no native build.",
+      "Walk through real places in your browser: a campus parking lot and an amphitheatre, captured as Gaussian Splats.",
+      "Gaussian splatting rebuilds a scene from a cloud of tiny coloured blobs instead of polygons, so it looks like a photograph.",
+      "First-person controls with pointer lock and configurable bounds, so you explore freely without walking out of the scene.",
+      "Loads compact .spz capture files and runs entirely in the browser — no install, no plugin.",
     ],
     stack: ["Three.js", "WebGL", "SPZ"],
     status: [{ kind: "live", label: "LIVE DEMO" }],
@@ -123,14 +139,15 @@ export const PROJECTS: ProjectRecord[] = [
     id: "astronaut",
     name: "Astronaut Digital Twin",
     repo: "Astronaut_health_digital_twin",
-    domain: "research",
+    domain: "simulation",
     tier: "featured-1",
     summary:
       "Couples the Borbely sleep model to the Oman vestibular model through sleep-pressure-gated adaptation, then quantifies the excess mission risk that coupling produces.",
     points: [
-      "Couples the Borbély two-process sleep model to the Oman vestibular model — two 1982 papers that existing tools simulate separately.",
-      "Adds sleep-pressure-gated vestibular adaptation, then runs counterfactuals to quantify the extra mission risk that coupling produces.",
-      "Monte Carlo over inter-individual variability, with BioGears supplying cardiovascular response on discrete events.",
+      "Models how sleep loss and space motion sickness affect astronauts — and how one feeds into the other.",
+      "Couples two classic 1982 models, Borbély's sleep model and Oman's motion-sickness model, that tools usually run apart.",
+      "A new mechanism lets sleep pressure slow the body's adaptation; counterfactual runs measure the extra mission risk.",
+      "Monte Carlo runs cover how people differ, BioGears adds heart responses, and a Three.js dashboard shows it all.",
     ],
     stack: ["Python", "FastAPI", "BioGears", "Monte Carlo", "Three.js"],
     status: [{ kind: "team", label: "TEAM PROJECT" }],
@@ -145,9 +162,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "A deterministic financial control plane: transaction engine, explainable risk scoring, transaction-graph intelligence, incident correlation and an investigator control room.",
     points: [
-      "A modular Spring Boot monolith: transaction engine, explainable risk scoring, temporal behavioural intelligence and graph intelligence.",
-      "Correlates scored events into incidents and exposes the whole investigation through a control-room UI.",
-      "Its own README scopes it honestly as a showcase MVP, not a production fraud system.",
+      "A simulated control room for financial operations: it generates activity, scores risk and helps investigate what looks wrong.",
+      "Every risk score is explainable — you see why a transaction was flagged, not just that it was.",
+      "Maps how accounts and transactions connect as a graph, then groups related evidence into incidents.",
+      "A modular Spring Boot backend on PostgreSQL with a React dashboard, openly scoped as a showcase rather than a live fraud system.",
     ],
     stack: ["Java 21", "Spring Boot", "PostgreSQL", "React", "TypeScript"],
     status: [],
@@ -157,14 +175,15 @@ export const PROJECTS: ProjectRecord[] = [
     id: "cardiotriage",
     name: "CardioTriage",
     repo: "CardioTriage",
-    domain: "graphics",
+    domain: "simulation",
     tier: "featured-1",
     summary:
       "Mass-casualty triage under time pressure, with every vital sign computed by the BioGears physiology engine rather than faked from a lookup table.",
     points: [
-      "Mass-casualty triage against a 120-second clock, with every vital sign computed by the BioGears physiology engine.",
-      "Wrong interventions carry physiologically accurate penalties rather than scripted ones.",
-      "React and Three.js over an async FastAPI backend, with state streamed on WebSocket.",
+      "A mass-casualty triage game: a queue of patients, 120 seconds, and every call about who gets treated first.",
+      "Vital signs aren't scripted — the BioGears physiology engine computes them live, so patients respond like real bodies.",
+      "Choose the wrong patient or the wrong intervention, and the penalty that follows is physiologically accurate.",
+      "A React and Three.js front end with a beating 3D heart, fed by a FastAPI backend over WebSocket.",
     ],
     stack: ["React", "Three.js", "FastAPI", "WebSocket", "BioGears"],
     status: [{ kind: "team", label: "TEAM PROJECT" }],
@@ -179,9 +198,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Voice and WhatsApp orders from Indian grocery stores turned into structured operations: multilingual ingestion, fuzzy SKU matching, a credit ledger and demand forecasting.",
     points: [
-      "Turns voice, image and WhatsApp orders in ten-plus languages into structured operations across three FastAPI services.",
-      "Fuzzy SKU matching, a credit ledger, and XGBoost demand forecasting.",
-      "Gemini and Groq extract, Sarvam handles speech, Cloud Vision reads the images.",
+      "Lets small Indian grocery stores run on voice notes and WhatsApp: orders arrive as speech, photos or text.",
+      "Understands ten-plus languages, then matches loosely named items to the right products with fuzzy matching.",
+      "Keeps a credit ledger for customers who buy on account, with escalating AI voice reminders when payments are overdue.",
+      "Forecasts demand with XGBoost, across three FastAPI services using Gemini, Groq, Sarvam and Cloud Vision.",
     ],
     stack: ["FastAPI", "Gemini", "Sarvam STT", "MongoDB", "XGBoost", "React"],
     status: [{ kind: "team", label: "TEAM PROJECT" }],
@@ -199,11 +219,31 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Routes messages to notify, digest or mute using a transparent weighted scorecard. Language models extract features; they never make the final call.",
     points: [
-      "Routes each message to notify, digest or mute using a transparent weighted scorecard.",
-      "Language models extract features only — they never make the final call, so every decision stays explainable.",
-      "Separate perception experts for text, image and voice, behind 244 passing tests.",
+      "Decides whether a message should notify you now, wait for a digest, or stay muted.",
+      "Reads text, images and voice notes — including Hindi, English and code-mixed speech.",
+      "Language models only extract signals; a transparent weighted scorecard makes the final call, so every decision can be explained.",
+      "Weighs sender history, relationship strength and risk, backed by 244 passing tests.",
     ],
     stack: ["Python", "Vision models", "Sarvam STT", "244 tests"],
+    status: [],
+    year: "2026",
+  },
+
+  {
+    id: "affordability",
+    name: "Buy or Wait?",
+    repo: "affordability-forecast-agent",
+    domain: "ai",
+    tier: "featured-2",
+    summary:
+      "An affordability agent that rebuilds a user's finances from transactions, messages and scanned documents, forecasts 90 days ahead and picks a safe way to pay.",
+    points: [
+      "Answers a deceptively hard question: can I actually afford this right now?",
+      "Rebuilds a person's finances from transactions, messages and scanned bills, then forecasts their balance 90 days ahead.",
+      "Recommends paying in full, in two parts, in instalments, waiting or declining — every number from a deterministic engine.",
+      "Models only extract facts, each re-checked against its source. The full 250-request run cost $2.68.",
+    ],
+    stack: ["Python", "Claude Haiku 4.5", "Claude Sonnet 5", "103 tests"],
     status: [],
     year: "2026",
   },
@@ -219,9 +259,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Real-time multiplayer IPL auction simulator with room sync, 200+ players and a drag-and-drop squad builder.",
     points: [
-      "Live multiplayer cricket auction: room codes, real-time sync, and 200+ players with career stats.",
-      "Drag-and-drop squad building, undo, an unsold second-round queue and auction analytics.",
-      "Deployed and shareable, on Firebase Realtime Database.",
+      "A live multiplayer IPL auction: join a room with a code and bid against friends in real time.",
+      "Over 200 real players with career stats, so every bid is an actual squad decision.",
+      "Drag-and-drop squad building, undo, a second round for unsold players, and analytics once the auction ends.",
+      "Built on React and Firebase Realtime Database, and deployed live.",
     ],
     demo: "https://goated-auction-2b1d8.web.app",
     stack: ["React", "Vite", "Firebase RTDB"],
@@ -238,9 +279,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "A collaborative canvas backed by a from-scratch RAFT implementation — leader election, log replication and failover, visible live.",
     points: [
-      "A collaborative whiteboard whose real subject is the consensus layer underneath it.",
-      "Leader election, log replication and heartbeats, written from scratch across three replica nodes.",
-      "A dashboard shows each node's role, term and commit index; killing a node triggers re-election on screen.",
+      "A shared whiteboard that keeps working even when one of its servers goes down.",
+      "Underneath is RAFT consensus, written from scratch: three nodes elect a leader and replicate every change.",
+      "A live dashboard shows each node's role, term and commit progress as it happens.",
+      "Kill a node mid-drawing and watch the cluster elect a new leader and carry on.",
     ],
     stack: ["Node.js", "WebSocket", "Docker"],
     status: [{ kind: "team", label: "TEAM PROJECT" }],
@@ -255,9 +297,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Fleet-wide Weibull reliability estimated across mutually distrusting wind-farm operators using malicious-secure multi-party computation.",
     points: [
-      "Estimates fleet-wide Weibull reliability across wind-farm operators who never share raw failure data.",
-      "Malicious-secure multi-party computation (MP-SPDZ, MASCOT) wrapped around a Newton-Raphson MLE solver.",
-      "Matches the centralised ground truth to within 0.0022%. The paper is written and not yet published.",
+      "Wind-farm operators want to know how reliable their turbines are, but won't share failure data with each other.",
+      "VRATA computes a shared, fleet-wide reliability estimate without anyone revealing their raw data.",
+      "It uses malicious-secure multi-party computation (MP-SPDZ, MASCOT) around a statistical Weibull fit.",
+      "The result matches the centralised answer to within 0.0022%. The paper is written and not yet published.",
     ],
     stack: ["MP-SPDZ", "MASCOT", "Python"],
     status: [
@@ -275,9 +318,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Compiles a business idea into a navigable operating simulation across thirteen domain engines.",
     points: [
-      "Compiles a business idea into a navigable operating simulation across thirteen domain engines.",
-      "An orchestration screen animates the engines compiling in parallel, then a workspace presents the pipeline graph.",
-      "An early build: the pipeline runs on a scripted front-end clock and the engine services are still stubbed.",
+      "Turns a business idea — say, a coffee shop in Koramangala — into a simulation you can explore before committing.",
+      "Thirteen engines cover location, market, competition, pricing, hiring, suppliers, risk and more.",
+      "An orchestration screen shows the engines compiling in parallel; a workspace then maps the pipeline as a graph.",
+      "An early build: the flow runs on a scripted front-end clock and the engines are still stubbed.",
     ],
     stack: ["Next.js 15", "TypeScript", "Zustand", "React Flow"],
     status: [{ kind: "prototype", label: "PROTOTYPE · BACKEND STUBBED" }],
@@ -293,9 +337,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Patient records and appointments with role-based access, MFA, AES-256 encrypted records and a full unit/integration/load test suite.",
     points: [
-      "Patient records and appointments with role-based access, MFA and AES-256 encrypted records.",
-      "Celery-driven reminders and audit logging over Django REST and PostgreSQL.",
-      "Carries unit, integration, system and Locust load tests behind two CI workflows.",
+      "A healthcare system for booking appointments and keeping patient records safe.",
+      "Role-based access and multi-factor login decide who sees what, and records are encrypted with AES-256.",
+      "Celery sends appointment reminders, and every action is written to an audit log.",
+      "Tested at every level — unit, integration, system and Locust load tests — behind two CI workflows.",
     ],
     stack: ["Django REST", "React", "PostgreSQL", "Celery"],
     status: [{ kind: "coursework", label: "ACADEMIC PROJECT" }],
@@ -310,9 +355,10 @@ export const PROJECTS: ProjectRecord[] = [
     summary:
       "Prescription digitisation through three OCR engines reconciled by an LLM extraction pass, over a normalised MySQL schema.",
     points: [
-      "Digitises prescriptions with three OCR engines — Tesseract, EasyOCR and Google Vision.",
-      "An LLM pass reconciles where they disagree into one structured record.",
-      "A normalised MySQL schema, with triggers and stored procedures doing real work.",
+      "Turns photos of prescriptions into structured, searchable records.",
+      "Reads each one with three OCR engines — Tesseract, EasyOCR and Google Vision — and compares what they see.",
+      "An LLM pass reconciles where the engines disagree into one clean record.",
+      "Stored in a normalised MySQL schema, with triggers and stored procedures doing real work.",
     ],
     stack: ["Flask", "MySQL", "Tesseract", "Google Vision", "Groq"],
     status: [{ kind: "coursework", label: "ACADEMIC PROJECT" }],

@@ -12,6 +12,8 @@ Research pass over all 23 repositories on the GitHub profile (22 in the original
 > Excluded count is now 9: the original 7 plus `IMU_Reconstruction` and `Cloth_Cutting_Mesh_Manipulation`. The remaining 12 project repositories stay open for consideration; `IMU-Reconstruction-SlimeVR` sits in its own Experience category, outside both the excluded list and the project hierarchy. Repos still carrying open questions (`Reality-Compiler`, `Astronaut_health_digital_twin`, `VRATA`) still need input, not exclusion, unless the user says otherwise.
 >
 > **User decision (confirmed, round 3 — 2026-09-14):** `affordability-forecast-agent`, uploaded by the user on 2026-09-13, is **marked for inclusion** on the website. It was inspected the same way as the rest (metadata, commit authorship, file tree, READMEs, problem statement, core source files, evaluation outputs). The included project count is now 13, plus the Experience entry; the excluded count stays at 9. Its tier placement below (Tier 2) is a recommendation, not a user decision.
+>
+> **User decision (confirmed, round 4 — 2026-09-14):** `CardioTriage` and `Astronaut_health_digital_twin` are reclassified into a new **Simulation** domain — both are physiological simulations built on the BioGears engine. CardioTriage leaves Computer Graphics and Astronaut_health_digital_twin leaves AI/ML and Computer Graphics; their tiers are unchanged (both Tier 1).
 
 ---
 
@@ -20,7 +22,7 @@ Research pass over all 23 repositories on the GitHub profile (22 in the original
 | # | Repository | Fork? | Author's commits / total | What it does (verified) | Category |
 |---|---|---|---|---|---|
 | 1 | **AEGIS** | No | n/a (single-author) | Simulated financial fraud/risk "control plane": transaction engine, explainable risk scoring, graph/network analysis of transactions, incident correlation, investigator UI | Systems / Software Engineering |
-| 2 | **CardioTriage** | Fork (from thorOdinson16) | 3 / 13 | Real-time mass-casualty triage hackathon game; vitals driven by the BioGears physiology engine (not lookup tables), 3D beating-heart viewport (Three.js), FastAPI + WebSocket backend | Computer Graphics / Simulation / AI |
+| 2 | **CardioTriage** | Fork (from thorOdinson16) | 3 / 13 | Real-time mass-casualty triage hackathon game; vitals driven by the BioGears physiology engine (not lookup tables), 3D beating-heart viewport (Three.js), FastAPI + WebSocket backend | Simulation (BioGears) — reclassified in round 4 |
 | 3 | **Message-Notification-Router** | No | n/a | Deterministic (non-LLM-decision) WhatsApp notification triage system: multimodal perception (text/image/voice experts), semantic feature extraction, weighted scorecard decision engine, 244 passing tests | AI / Systems |
 | 4 | **Mock-IPL-Auction** ("Goated Auction") | No | n/a | Real-time multiplayer cricket-auction simulator, React+Vite, Firebase Realtime DB sync, drag-and-drop team builder, live deployed app | Software Engineering |
 | 5 | **3D-Visualization-of-Gaussian-Splats** | No | n/a | Browser-based first-person Gaussian Splat viewer (WASD + mouse-look) for `.spz` scenes of real campus locations (parking lot, amphitheater), pointer-lock controls, configurable boundaries | Computer Graphics / XR |
@@ -29,7 +31,7 @@ Research pass over all 23 repositories on the GitHub profile (22 in the original
 | 8 | **KiranaAI** | Fork (AKPranav1 / Kirana-orchestrator) | 16 / 66 | Enterprise automation platform for Indian grocery stores: 3 microservices (FastAPI), voice/image/text order ingestion (Gemini, Sarvam STT, Cloud Vision OCR), fuzzy multilingual SKU matching, credit-ledger + debt-collection ("Vasooli") voice escalation via ElevenLabs TTS, XGBoost demand forecasting, React dashboard | AI / Software Engineering |
 | 9 | **VRATA** | Fork (thorOdinson16) | 1 / 36 | Privacy-preserving federated statistics research project: malicious-secure MPC (MASCOT protocol, MP-SPDZ) to jointly estimate Weibull reliability parameters across wind-turbine fleets without sharing raw data; includes baselines, results, apparent publication writeup | Systems / Research |
 | 10 | **MiniRAFT-DrawingBoard** | Fork (thorOdinson16) | 2 / 15 | Real-time collaborative whiteboard backed by a from-scratch RAFT consensus implementation (leader election, log replication, heartbeats) with a live cluster-health dashboard visualizing node roles/terms | Systems / Distributed Computing |
-| 11 | **Astronaut_health_digital_twin** | Fork (thorOdinson16) | 5 / 16 | Research-grade coupled sleep-fatigue/space-motion-sickness digital twin (Borbely + Oman models coupled via a novel mechanism), Monte Carlo analysis, BioGears cardiovascular integration, literature-cited parameters, Three.js Interstellar-themed 3D dashboard | AI / Research / Computer Graphics — **Featured** (updated after README added) |
+| 11 | **Astronaut_health_digital_twin** | Fork (thorOdinson16) | 5 / 16 | Research-grade coupled sleep-fatigue/space-motion-sickness digital twin (Borbely + Oman models coupled via a novel mechanism), Monte Carlo analysis, BioGears cardiovascular integration, literature-cited parameters, Three.js Interstellar-themed 3D dashboard | Simulation (BioGears) — **Featured** (updated after README added; reclassified in round 4) |
 | 12 | **Healthcare-Appointment-and-Patient-Record-Manager** | No | n/a | Full Django REST + React healthcare records system: RBAC auth w/ MFA, AES-256 encrypted records, appointment booking, Celery notifications, audit logs; extensive test suite (unit/integration/system/performance/Locust load tests) and CI/CD workflows — reads as a structured coursework/assessment project (has a `project-evaluation.yml` CI workflow) | Software Engineering |
 | 13 | **Medivault** | No | n/a | Flask + MySQL prescription manager with triple OCR (Tesseract/EasyOCR/Google Vision) and Groq/Llama-based extraction of prescription data, basic CRUD + analytics UI | Software Engineering / AI |
 | 14 | **Ludo** | No | n/a | Full-stack Ludo board game: Node.js/Express backend, MongoDB leaderboard, vanilla JS game logic/UI, auth | Software Engineering |
@@ -221,7 +223,6 @@ Research pass over all 23 repositories on the GitHub profile (22 in the original
 **AI / ML**
 - KiranaAI (featured) — multilingual voice/vision LLM pipeline + forecasting
 - Message-Notification-Router (featured) — deterministic multimodal decision engine
-- Astronaut_health_digital_twin (featured) — coupled-ODE physiological research model, Monte Carlo, BioGears integration
 - affordability-forecast-agent (featured, round 3) — deterministic financial-forecasting agent; LLMs extract grounded evidence only, the engine computes every number
 - Medivault (secondary) — OCR + LLM extraction
 
@@ -234,10 +235,12 @@ Research pass over all 23 repositories on the GitHub profile (22 in the original
 - 3D-Visualization-of-Gaussian-Splats (featured) — first-person Gaussian Splat viewer
 - (IMU-Reconstruction-SlimeVR is motion-capture work but is classified as EXPERIENCE, not a domain project — see above)
 
+**Simulation (BioGears physiology)** *(new in round 4)*
+- Astronaut_health_digital_twin (featured) — coupled sleep-fatigue / motion-sickness physiological model, Monte Carlo, BioGears integration, Three.js Interstellar-themed 3D dashboard
+- CardioTriage (featured) — mass-casualty triage with every vital computed by BioGears, physiologically-driven 3D heart viewport
+
 **Computer Graphics**
-- CardioTriage (featured) — physiologically-driven 3D heart viewport
-- Astronaut_health_digital_twin (featured) — Three.js Interstellar-themed 3D dashboard (Endurance ship, black hole, astronaut model, click-to-inspect regions)
-- (3D-Viz above also belongs here)
+- 3D-Visualization-of-Gaussian-Splats — see XR above. CardioTriage and Astronaut_health_digital_twin still have strong 3D surfaces, but their domain is now Simulation.
 
 **Systems / Distributed Computing**
 - AEGIS (featured) — modular monolith, graph analysis engine

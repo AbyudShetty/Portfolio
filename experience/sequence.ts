@@ -19,23 +19,23 @@ import * as THREE from "three";
 import { progressAt } from "@/scene/cameraChoreography";
 
 /** The Endurance and the astronaut arrive together, as one composition. */
-export const CRAFT_ENTER = { start: progressAt(27), end: progressAt(96) };
+export const CRAFT_ENTER = { start: progressAt(307), end: progressAt(376) };
 
 /**
  * The astronaut enters on the same beat as the craft. They are two halves of
  * one image — a figure already tethered to a ship — so staggering them would
  * only delay the picture the section is actually about.
  */
-export const ASTRONAUT_ENTER = { start: progressAt(27), end: progressAt(104) };
+export const ASTRONAUT_ENTER = { start: progressAt(307), end: progressAt(384) };
 
 /** The long float in the middle of frame, between arrival and departure. */
-export const ASTRONAUT_HOLD = { start: progressAt(104), end: progressAt(204) };
+export const ASTRONAUT_HOLD = { start: progressAt(384), end: progressAt(484) };
 
 /**
  * A slow drift to the right across 21–29% of the journey — the last thing the
  * figure does before it leaves, and the beat that sets up the exit.
  */
-export const ASTRONAUT_DRIFT = { start: progressAt(143), end: progressAt(197) };
+export const ASTRONAUT_DRIFT = { start: progressAt(423), end: progressAt(477) };
 
 /**
  * The figure leaves through the bottom-left of the frame while
@@ -43,7 +43,7 @@ export const ASTRONAUT_DRIFT = { start: progressAt(143), end: progressAt(197) };
  * rather than a screen offset so it drifts out like an object, not like a
  * sprite pinned to the viewport.
  */
-export const ASTRONAUT_EXIT = { start: progressAt(204), end: progressAt(372) };
+export const ASTRONAUT_EXIT = { start: progressAt(484), end: progressAt(652) };
 
 /**
  * The cable is a fixed physical link, not an event.
@@ -54,23 +54,23 @@ export const ASTRONAUT_EXIT = { start: progressAt(204), end: progressAt(372) };
  * connection being *made* on screen, which is a different story from an
  * astronaut who is already tethered to a ship.
  */
-export const TETHER_ATTACH_AT = progressAt(42);
+export const TETHER_ATTACH_AT = progressAt(322);
 
 /**
  * The cable fades rather than vanishing, and outlasts the figure slightly, so
  * it reads as trailing away with it instead of being switched off.
  */
-export const TETHER_FADE = { start: progressAt(300), end: progressAt(392) };
+export const TETHER_FADE = { start: progressAt(580), end: progressAt(672) };
 
 /** Where the approach/departure beat ends and the craft is gone for good. */
-export const PHASE_A_END = progressAt(430);
+export const PHASE_A_END = progressAt(710);
 
 
 /** Past this the beat is behind the camera and stops being simulated. */
-export const SEQUENCE_END = progressAt(780);
+export const SEQUENCE_END = progressAt(960);
 
 /** Reduced motion holds this moment: connected, craft departing. */
-export const STATIC_MOMENT = progressAt(285);
+export const STATIC_MOMENT = progressAt(565);
 
 /**
  * Live attachment points, in world space.
@@ -85,6 +85,12 @@ export const anchors = {
   astronautReady: false,
   craft: new THREE.Vector3(),
   craftReady: false,
+  /**
+   * The Endurance as a volume: where it is, how far its structure reaches,
+   * and how present it is (0 while hidden, rising with its arrival). Read by
+   * enduranceLayer.ts to keep pebbles behind the craft instead of in its orbit.
+   */
+  ring: { center: new THREE.Vector3(), radius: 0, presence: 0 },
 };
 
 export function windowProgress(

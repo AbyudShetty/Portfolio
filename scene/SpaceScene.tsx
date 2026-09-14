@@ -5,12 +5,18 @@ import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
 import { ENVIRONMENT, SPACE } from "@/lib/design-tokens";
-import { attachPointerTracking, fieldActions } from "@/hooks/useFieldState";
+import {
+  attachPointerTracking,
+  fieldActions,
+  getFieldState,
+} from "@/hooks/useFieldState";
 import { PerformanceProvider } from "@/hooks/usePerformanceTier";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { scroll } from "@/hooks/useScrollProgress";
 import { ExperienceComposition } from "@/experience/ExperienceComposition";
 import { EnduranceSequence } from "@/experience/EnduranceSequence";
+import { BlackHole } from "@/experience/BlackHole";
+import { ENDING } from "./ending";
 import { AtmosphericPebbles } from "@/projects/AtmosphericPebbles";
 import { ProjectObject } from "@/projects/ProjectObject";
 import { PROJECT_OBJECTS, PROJECTS_BY_IMPORTANCE } from "@/projects/ProjectData";
@@ -77,8 +83,15 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
     // fire at most once per frame, and `scroll.progress` is written by the
     // hook's own listener, which is registered first.
     const read = () => {
-      const next = scroll.progress >= INSPECTION_PROGRESS;
+      const next =
+        scroll.progress >= INSPECTION_PROGRESS &&
+        scroll.progress < ENDING.interactiveUntil;
       setInteractive((current) => (current === next ? current : next));
+      // Inspection is over once the ending starts: a stone left open would
+      // otherwise be carried into the black hole with its panel still up.
+      if (scroll.progress >= ENDING.interactiveUntil && getFieldState().selectedId) {
+        fieldActions.select(null);
+      }
     };
     read();
     window.addEventListener("scroll", read, { passive: true });
@@ -108,6 +121,9 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
 
       {/* The Endurance, and the cable that stays attached after it has gone. */}
       <EnduranceSequence reducedMotion={reducedMotion} />
+
+      {/* The ending: traced in a shader, nothing to load. */}
+      <BlackHole reducedMotion={reducedMotion} />
 
       {/* Class B: distant, soft, unlabelled, non-interactive — and gone by the
           time the field settles, so the portfolio stands alone. */}

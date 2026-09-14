@@ -9,7 +9,11 @@ import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { scroll } from "@/hooks/useScrollProgress";
 import { progressAt } from "@/scene/cameraChoreography";
 import { smoothstep01 } from "@/scene/reveal";
-import { Endurance, ENDURANCE_RING_RADIUS } from "./Endurance";
+import {
+  Endurance,
+  ENDURANCE_EXTENT_RADIUS,
+  ENDURANCE_RING_RADIUS,
+} from "./Endurance";
 import {
   anchors,
   CRAFT_ENTER,
@@ -18,6 +22,13 @@ import {
   TETHER_FADE,
   windowProgress,
 } from "./sequence";
+import {
+  CRAFT_ENDING_SCALE,
+  CRAFT_ENTRY,
+  ENDING,
+  fallInto,
+  windowProgress as endingWindow,
+} from "@/scene/ending";
 
 /**
  * EnduranceSequence — the craft, the cable, and the scroll that drives both.
@@ -41,21 +52,21 @@ import {
 /** Waypoints set the *timing*; the spline through them sets the path. */
 const WAYPOINTS: { at: number; position: [number, number, number] }[] = [
   { at: progressAt(0), position: [-48, -36, -104] },
-  { at: progressAt(27), position: [-42, -30, -86] },
-  { at: progressAt(88), position: [-34, -20, -62] },
-  { at: progressAt(163), position: [-27, -11, -44] },
+  { at: progressAt(307), position: [-42, -30, -86] },
+  { at: progressAt(368), position: [-34, -20, -62] },
+  { at: progressAt(443), position: [-27, -11, -44] },
   // The cable begins paying out around here.
-  { at: progressAt(204), position: [-22, -5, -34] },
+  { at: progressAt(484), position: [-22, -5, -34] },
   // Closest approach — the ring fills the upper left at ~40° across.
-  { at: progressAt(272), position: [-19, 4, -26] },
+  { at: progressAt(552), position: [-19, 4, -26] },
   // Climbing away hard, and *backwards*. The camera also rises after 54%, so
   // a purely vertical exit would carry the craft past the lens and make it
   // grow on its way out. Gaining depth as well as height means it recedes as
   // it leaves, which is what a departure is supposed to look like.
-  { at: progressAt(340), position: [-18, 26, -26] },
-  { at: progressAt(420), position: [-18, 60, -34] },
-  { at: progressAt(520), position: [-17, 108, -46] },
-  { at: progressAt(680), position: [-16, 190, -60] },
+  { at: progressAt(620), position: [-18, 26, -26] },
+  { at: progressAt(700), position: [-18, 60, -34] },
+  { at: progressAt(800), position: [-17, 108, -46] },
+  { at: progressAt(960), position: [-16, 190, -60] },
 ];
 
 /**
@@ -173,9 +184,14 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
     const enter = smoothstep01(windowProgress(progress, CRAFT_ENTER));
     const fade = 1 - smoothstep01(windowProgress(progress, TETHER_FADE));
 
-    if (enter <= 0.001 || progress > PHASE_A_END) {
+    // The ending brings the craft back for one last pass, into the black hole.
+    const craftFall = reducedMotion ? 0 : endingWindow(progress, ENDING.craftFall);
+    const inEnding = craftFall > 0 && craftFall < 1;
+
+    if (!inEnding && (enter <= 0.001 || progress > PHASE_A_END)) {
       if (group.visible) group.visible = false;
       if (tube.visible) tube.visible = false;
+      anchors.ring.presence = 0;
       return;
     }
     if (!group.visible) group.visible = true;
@@ -213,15 +229,42 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
       group.quaternion.slerp(_quat, reducedMotion ? 1 : 0.05);
     }
 
+    // The craft's live footprint, for pebbles to stay behind (enduranceLayer).
+    // Presence follows the arrival ramp, so the push grows in with the craft.
+    anchors.ring.center.copy(group.position);
+    anchors.ring.radius = ENDURANCE_EXTENT_RADIUS * group.scale.x;
+    anchors.ring.presence = enter;
+
+    // In the ending the path above is overridden: the craft falls in, shrinking,
+    // and the cable's thickness and routing scale with it so it stays a cable.
+    let ringScale = 1;
+    if (inEnding) {
+      const size = fallInto(group.position, CRAFT_ENTRY, craftFall, 1.3);
+      ringScale = CRAFT_ENDING_SCALE * size;
+      group.scale.setScalar(ringScale);
+      anchors.ring.presence = 0;
+      // The fall moves far each frame: no damping on the craft or the cable,
+      // or both trail behind it; and a clean re-arrival if scrolled back up.
+      craftSettled.current = false;
+      settled.current = false;
+      if (size <= 0.002) {
+        if (group.visible) group.visible = false;
+        if (tube.visible) tube.visible = false;
+        return;
+      }
+    }
+    const tetherFade = inEnding ? 1 : fade;
+    const cableRadius = CABLE_RADIUS * ringScale;
+
     // ── The cable.
-    if (!anchors.astronautReady || !rangerAnchor.current || fade <= 0.01) {
+    if (!anchors.astronautReady || !rangerAnchor.current || tetherFade <= 0.01) {
       if (tube.visible) tube.visible = false;
       settled.current = false;
       return;
     }
     if (!tube.visible) tube.visible = true;
     // The cable dims away with the figure instead of being switched off.
-    cableMaterial.opacity = fade;
+    cableMaterial.opacity = tetherFade;
 
     // The Ranger hardpoint, live — this is the value that carries the ring's
     // rotation into the cable.
@@ -263,9 +306,9 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
         .addScaledVector(_up, length * slack * vertical);
       // Strongest on the control point nearest the craft, gone by the far end.
       if (k === 0) {
-        _mid.addScaledVector(_outward, ENDURANCE_RING_RADIUS * 0.72);
+        _mid.addScaledVector(_outward, ENDURANCE_RING_RADIUS * 0.72 * ringScale);
       } else if (k === 1) {
-        _mid.addScaledVector(_outward, ENDURANCE_RING_RADIUS * 0.22);
+        _mid.addScaledVector(_outward, ENDURANCE_RING_RADIUS * 0.22 * ringScale);
       }
 
       if (!settled.current || reducedMotion) {
@@ -319,9 +362,9 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
         normal.setXYZ(index, _vertex.x, _vertex.y, _vertex.z);
         position.setXYZ(
           index,
-          _pos.x + _vertex.x * CABLE_RADIUS,
-          _pos.y + _vertex.y * CABLE_RADIUS,
-          _pos.z + _vertex.z * CABLE_RADIUS,
+          _pos.x + _vertex.x * cableRadius,
+          _pos.y + _vertex.y * cableRadius,
+          _pos.z + _vertex.z * cableRadius,
         );
       }
     }

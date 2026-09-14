@@ -1,15 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif, Newsreader } from "next/font/google";
 import "./globals.css";
 
 /**
- * Typography — DESIGN.md §3. Three families, three jobs, no overlap.
+ * Typography — DESIGN.md §3.
  *
  *   Instrument Serif  display only, 36px and above, regular weight only
  *   Geist Sans        body and UI
  *   Geist Mono        instrument labelling — coordinates, metrics, tags.
  *                     Never body copy: mono prose is a terminal theme, which
  *                     the brief rules out.
+ *   Newsreader        the running text engraved on the stones. A text serif
+ *                     drawn for reading, so it keeps its shape small and on a
+ *                     textured surface, where Instrument Serif's thin display
+ *                     strokes would break up. Used by the engraving canvas
+ *                     only; nothing in the DOM is set in it.
  */
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +32,12 @@ const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
   subsets: ["latin"],
   weight: "400",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
   display: "swap",
 });
 
@@ -49,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${newsreader.variable}`}
     >
       <body>{children}</body>
     </html>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -13,6 +13,7 @@ import {
   revealFactor,
   smoothstep01,
 } from "@/scene/reveal";
+import { layerBehindEndurance } from "@/experience/enduranceLayer";
 import { getPebbleGeometry } from "./projectGeometry";
 
 /**
@@ -97,6 +98,7 @@ export function AtmosphericPebbles({
   reducedMotion: boolean;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
+  const camera = useThree((s) => s.camera);
   // Frozen at mount, not live: how many of these exist decides what is on
   // screen, and a count that changes part-way through a scroll reads as
   // objects blinking out rather than as a frame saved.
@@ -171,7 +173,15 @@ export function AtmosphericPebbles({
       // Arrives from further out, exactly as the real specimens do.
       _position.z -= (1 - reveal) * 34;
       _quaternion.setFromEuler(d.rotation);
-      _scale.setScalar(d.scale * reveal);
+      // Kept a layer behind the Endurance while it passes — same pixel, same
+      // apparent size, but physically behind the ring (enduranceLayer.ts).
+      const size = d.scale * reveal;
+      const layered = layerBehindEndurance(
+        _position,
+        (geometry.boundingSphere?.radius ?? 1.2) * size,
+        camera.position,
+      );
+      _scale.setScalar(size * layered);
 
       _matrix.compose(_position, _quaternion, _scale);
       instanced.setMatrixAt(i, _matrix);

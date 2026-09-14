@@ -21,12 +21,12 @@ import { progressAt } from "./cameraChoreography";
  * through the overlap so the arriving objects rise into the lower frame
  * rather than crossing the typography. The title is never intersected.
  */
-export const REVEAL_START = progressAt(14);
-export const REVEAL_END = progressAt(44);
+export const REVEAL_START = progressAt(70);
+export const REVEAL_END = progressAt(200);
 
 /** The gathering. Complete slightly before the overhead keyframe settles. */
-export const CONVERGE_START = progressAt(300);
-export const CONVERGE_END = progressAt(470);
+export const CONVERGE_START = progressAt(580);
+export const CONVERGE_END = progressAt(750);
 
 /**
  * The atmospheric pebbles leave while the real ones gather, so the field
@@ -34,8 +34,8 @@ export const CONVERGE_END = progressAt(470);
  * with the convergence and are gone before it completes — a fade and a drift,
  * never a visibility toggle.
  */
-export const ATMOSPHERE_FADE_START = progressAt(330);
-export const ATMOSPHERE_FADE_END = progressAt(450);
+export const ATMOSPHERE_FADE_START = progressAt(610);
+export const ATMOSPHERE_FADE_END = progressAt(730);
 
 export function smoothstep01(t: number): number {
   const x = t < 0 ? 0 : t > 1 ? 1 : t;

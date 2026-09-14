@@ -149,9 +149,16 @@
     0 2px 14px rgba(0, 0, 0, 0.65);
 }
 
+/*
+   No ring on the panel itself. Focus is moved here programmatically when a
+   stone opens, so keyboard readers land where the eye does — but the panel is
+   a container, not a control, and the site-wide :focus-visible rule was
+   drawing a signal-orange box around text meant to look cut into the stone.
+   The controls inside it (close, links) keep their own focus rings.
+*/
+.specimen__panel:focus,
 .specimen__panel:focus-visible {
-  outline: 2px solid var(--signal);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /*
@@ -223,15 +230,15 @@
   color: var(--text-secondary);
 }
 
-/* A hairline rather than a bullet — the same mark the field labels carry. */
+/* The short orange scored rule used by "Along the way" and the engravings. */
 .specimen__points li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.62em;
-  width: 8px;
+  top: 0.72em;
+  width: 12px;
   height: 1px;
-  background: var(--graphite-400);
+  background: var(--signal);
 }
 
 .specimen__stack {
@@ -516,5 +523,100 @@
   .specimen__adjacent,
   .specimen__hint {
     display: none;
+  }
+}
+
+/* ============================================================================
+   Engraved build — the words live on the stone
+   ========================================================================= */
+
+/*
+   Desktop: the stone carries the text as an engraving, so the DOM copy is
+   visually hidden but kept for screen readers (the same technique as
+   .sr-only). Narrow screens have no stone and keep the visible panel.
+*/
+@media (min-width: 721px) {
+  .specimen__panel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
+
+/*
+   Everything that is not the stone sits below it and waits for it. The stone
+   is ~72vh tall and centred, so its lower edge is at ~86vh; this stack is
+   bottom-anchored and about 70px tall, which keeps it clear of the stone at
+   ordinary window heights.
+*/
+.specimen__footer {
+  --arrived: clamp(0, calc((var(--specimen-presence, 0) - 0.86) / 0.14), 1);
+  position: absolute;
+  left: 50%;
+  bottom: max(14px, 1.8vh);
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  opacity: var(--arrived);
+  transform: translateY(calc((1 - var(--arrived)) * 8px));
+}
+
+.specimen__footer .specimen__adjacent,
+.specimen__footer .specimen__hint {
+  position: static;
+  translate: none;
+}
+
+.specimen__actions {
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+}
+
+.specimen__return {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+
+.specimen__return:hover {
+  color: var(--text-primary);
+}
+
+.specimen__return:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/*
+   No stone on narrow screens, so nothing publishes --specimen-presence: the
+   text and controls must not wait for an arrival that never happens.
+*/
+@media (max-width: 720px) {
+  .specimen__panel > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .specimen__footer {
+    position: static;
+    translate: none;
+    opacity: 1;
+    transform: none;
   }
 }

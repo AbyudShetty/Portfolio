@@ -2,6 +2,8 @@
 
 import { EXPERIENCE_RECORD } from "@/projects/ProjectData";
 import { ProjectList } from "@/ui/ProjectList";
+import { AboutContent } from "@/ui/sections/AboutSection";
+import { SOCIALS } from "@/ui/sections/NarrativeSections";
 
 /**
  * MobileNarrative — the same three sections, told without the camera.
@@ -24,16 +26,25 @@ export function MobileNarrative() {
         <h1 className="mobile__name">Abyud Shetty</h1>
       </section>
 
+      <section className="mobile__section" aria-labelledby="about-heading">
+        <AboutContent staged={false} />
+      </section>
+
       <section className="mobile__section" aria-labelledby="m-experience">
         <p className="kicker">Experience</p>
         <h2 id="m-experience" className="mobile__title">
           {record.name}
         </h2>
         <p className="mobile__meta">
-          {record.org ? `${record.org} · ` : ""}Internship · {record.year} ·{" "}
-          {record.status.map((s) => s.label).join(" · ")}
+          {record.org ? `${record.org} · ` : ""}Internship · {record.year}
         </p>
-        <p className="mobile__summary">{record.summary}</p>
+        <ul className="experience__points">
+          {(record.narrative ?? [record.summary]).map((point) => (
+            <li key={point} className="experience__point">
+              {point}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="mobile__section" aria-labelledby="m-projects">
@@ -42,6 +53,26 @@ export function MobileNarrative() {
           Selected Work
         </h2>
         <ProjectList variant="visible" />
+      </section>
+
+      {/* The same close as the desktop page: the name again, and the links. */}
+      <section className="mobile__landing" aria-labelledby="m-credits">
+        <h2 id="m-credits" className="mobile__name">
+          Abyud Shetty
+        </h2>
+        <nav className="landing__links" aria-label="Profiles">
+          {SOCIALS.map((social) => (
+            <a
+              key={social.label}
+              className="landing__link"
+              href={social.href}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {social.label}
+            </a>
+          ))}
+        </nav>
       </section>
     </div>
   );

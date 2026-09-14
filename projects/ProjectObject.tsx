@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { Spring } from "@/lib/spring";
@@ -13,18 +13,22 @@ import {
 } from "@/hooks/useFieldState";
 import { useMountTier } from "@/hooks/usePerformanceTier";
 import { scroll } from "@/hooks/useScrollProgress";
+import { layerBehindEndurance } from "@/experience/enduranceLayer";
 import { FIELD_OPTICS } from "@/scene/cameraChoreography";
+import { ENDING, fallInto, windowProgress } from "@/scene/ending";
 import {
   convergeFactor,
   easeOutCubic,
   revealFactor,
   smoothstep01,
 } from "@/scene/reveal";
+import { getPebbleCentre, getPebbleGeometry } from "./projectGeometry";
 import {
-  getPebbleCentre,
-  getPebbleFaceNormal,
-  getPebbleGeometry,
-} from "./projectGeometry";
+  createEngravingMaterial,
+  getEngravingGeometry,
+  getEngravingTextures,
+  getFaceFrame,
+} from "./engraving";
 import { ProjectLabel, type LabelState } from "./ProjectLabel";
 import {
   APPROACH,
@@ -47,6 +51,18 @@ const _axis = new THREE.Vector3();
 const _face = new THREE.Quaternion();
 const _identity = new THREE.Quaternion();
 const _centre = new THREE.Vector3();
+const _camUp = new THREE.Vector3();
+const _right = new THREE.Vector3();
+const _up = new THREE.Vector3();
+const _basis = new THREE.Matrix4();
+const _exit = new THREE.Vector3();
+const _home = new THREE.Vector3();
+
+/** The field's left and right edges (gathered x), for leftmost-first order. */
+const FIELD_X_MIN = -6.8;
+const FIELD_X_SPAN = 13.9;
+/** How far a stone travels left as it leaves, in world units. */
+const EXIT_DISTANCE = 34;
 
 /**
  * Both branches of the raycast toggle have to be real functions.
@@ -99,13 +115,11 @@ export function ProjectObject({
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
   const tier = useMountTier();
+  const gl = useThree((s) => s.gl);
 
   const profile = TIER_PROFILE[record.tier];
   const geometry = useMemo(() => getPebbleGeometry(record.id), [record.id]);
-  const faceNormal = useMemo(
-    () => getPebbleFaceNormal(record.id),
-    [record.id],
-  );
+  const faceFrame = useMemo(() => getFaceFrame(record.id), [record.id]);
   const centre = useMemo(() => getPebbleCentre(record.id), [record.id]);
   // Held as colours rather than strings so the per-frame blend costs no
   // parsing. `_body` is the scratch the result is written through.
@@ -127,12 +141,44 @@ export function ProjectObject({
   const [proximate, setProximate] = useState(false);
   const publishedPresence = useRef(-1);
   const [labelled, setLabelled] = useState(reducedMotion);
+  // True once the ending has begun: labels go out before the stones leave.
+  const [ending, setEnding] = useState(false);
+
+  /*
+    The engraving is built the first time this stone is opened, not at mount:
+    thirteen text canvases and decals nobody has asked to read yet would only
+    slow the first load. After that it is cached (engraving.ts) and simply
+    fades with the stone's flight.
+  */
+  const [engraving, setEngraving] = useState<{
+    geometry: THREE.BufferGeometry;
+    material: THREE.MeshStandardMaterial;
+  } | null>(null);
+  useEffect(() => {
+    if (!isSelected || engraving) return;
+    let cancelled = false;
+    getEngravingTextures(record, gl.capabilities.getMaxAnisotropy()).then(
+      (textures) => {
+        if (cancelled) return;
+        setEngraving({
+          geometry: getEngravingGeometry(record.id),
+          material: createEngravingMaterial(textures),
+        });
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [isSelected, engraving, record, gl]);
+  useEffect(() => () => engraving?.material.dispose(), [engraving]);
 
   const active = isHovered || isFocused;
   // Hover outranks dimmed on purpose: with one stone at the lens the rest of
   // the field goes quiet, but pointing at a neighbour has to still say what it
   // is — that is how a reader knows what they are about to jump to.
-  const labelState: LabelState = active
+  const labelState: LabelState = ending
+    ? "dimmed"
+    : active
     ? "hover"
     : specimenOpen
       ? "dimmed"
@@ -190,6 +236,8 @@ export function ProjectObject({
     // Names arrive with the field, once the stones are most of the way home.
     const shouldLabel = converge > 0.55;
     if (shouldLabel !== labelled) setLabelled(shouldLabel);
+    const endingStarted = !reducedMotion && progress > ENDING.labelsOut.start;
+    if (endingStarted !== ending) setEnding(endingStarted);
     const s = coordinate.scattered;
     const gth = coordinate.gathered;
     const baseX = s[0] + (gth[0] - s[0]) * converge;
@@ -225,12 +273,16 @@ export function ProjectObject({
     // target is a hard zero, not a small number: three.js decides whether to
     // run the whole extra scene pass on `transmission > 0`, so 0.001 costs
     // exactly as much as 0.66.
+    // ...and taken away again for the ending: a stone falling into the black
+    // hole is too small to show refraction, and glass there would re-render
+    // the whole scene — black hole and Endurance included — a second time.
     const optical = reducedMotion
       ? 1
       : smoothstep01(
           (progress - FIELD_OPTICS.start) /
             (FIELD_OPTICS.end - FIELD_OPTICS.start),
-        );
+        ) *
+        (1 - smoothstep01(windowProgress(progress, ENDING.labelsOut)));
     springs.transmission.target = isSelected
       ? SELECTED_TRANSMISSION
       : optical * profile.material.transmission;
@@ -290,10 +342,20 @@ export function ProjectObject({
     );
 
     const arrivalScale = easeOutCubic(reveal);
-    const fieldScale =
+    const unlayeredScale =
       profile.scale *
       arrivalScale *
       (1 + springs.approach.value * (APPROACH.scale - 1));
+    // While the Endurance is present, a stone in its way is slid back along
+    // the line of sight to behind it and scaled to match, so it looks exactly
+    // the same but can never cross the ring's orbit. See enduranceLayer.ts.
+    const fieldScale =
+      unlayeredScale *
+      layerBehindEndurance(
+        _field,
+        (geometry.boundingSphere?.radius ?? 1.2) * unlayeredScale,
+        camera.position,
+      );
 
     if (present > 0.0005) {
       // ── 4. Presentation. The station is recomputed in camera space every
@@ -311,8 +373,15 @@ export function ProjectObject({
       // Turn the broad face to the lens. Slerped from rest rather than set,
       // so the stone rolls over as it travels instead of snapping flat the
       // instant it is clicked.
+      // Not just "face the lens": the face's own right and up are mapped onto
+      // the camera's, so the engraved lines read level instead of at whatever
+      // roll the stone happened to settle at in the field.
       _axis.copy(camera.position).sub(g.position).normalize();
-      _face.setFromUnitVectors(faceNormal, _axis);
+      _camUp.set(0, 1, 0).applyQuaternion(camera.quaternion);
+      _right.crossVectors(_camUp, _axis).normalize();
+      _up.crossVectors(_axis, _right);
+      _basis.makeBasis(_right, _up, _axis).multiply(faceFrame.toFrame);
+      _face.setFromRotationMatrix(_basis);
       g.quaternion.slerpQuaternions(_identity, _face, present);
 
       // Put the stone's *silhouette* on the station rather than its origin,
@@ -328,6 +397,42 @@ export function ProjectObject({
       g.position.copy(_field);
       g.scale.setScalar(fieldScale);
       if (g.quaternion.w !== 1) g.quaternion.identity();
+    }
+
+    // ── 5. The ending. The stones leave to the left, leftmost first, then
+    // spiral into the black hole in the same order (scene/ending.ts).
+    if (!reducedMotion && progress > ENDING.pebbles.start) {
+      const timing = ENDING.pebbles;
+      const order = THREE.MathUtils.clamp(
+        (coordinate.gathered[0] - FIELD_X_MIN) / FIELD_X_SPAN,
+        0,
+        1,
+      );
+      const start = timing.start + timing.stagger * order;
+
+      // Accelerating, and never clamped: a stone is taken, it does not glide
+      // off and stop. It is still picking up speed when the fall catches it.
+      _home.copy(g.position);
+      const leave = Math.min(Math.max(progress - start, 0) / timing.leave, 2);
+      const pull = leave * leave;
+      _exit.copy(_home);
+      _exit.x -= pull * EXIT_DISTANCE;
+      _exit.y -= pull * 2;
+      _exit.z -= pull * 8;
+
+      const fallT = (progress - start - timing.catch) / timing.fall;
+
+      let size = 1;
+      if (fallT > 0) {
+        size = fallInto(g.position, _exit, fallT, 1.5, _home);
+      } else {
+        g.position.copy(_exit);
+      }
+      if (size <= 0.002) {
+        if (g.visible) g.visible = false;
+        return;
+      }
+      g.scale.multiplyScalar(size);
     }
 
     const mat = materialRef.current;
@@ -353,6 +458,14 @@ export function ProjectObject({
       mat.transmission =
         springs.transmission.value < 0.02 ? 0 : springs.transmission.value;
       mat.emissiveIntensity = springs.emissive.value;
+    }
+
+    if (engraving) {
+      // Cut in as the stone arrives and grown out as it leaves. The words are
+      // on the surface, so their timing is the stone's timing by construction.
+      const cut = smoothstep01((present - 0.35) / 0.55);
+      engraving.material.opacity = cut;
+      engraving.material.visible = cut > 0.002;
     }
 
     if (active) {
@@ -409,6 +522,15 @@ export function ProjectObject({
           transparent={false}
         />
       </mesh>
+
+      {engraving ? (
+        <mesh
+          geometry={engraving.geometry}
+          material={engraving.material}
+          renderOrder={3}
+          raycast={NO_RAYCAST}
+        />
+      ) : null}
 
       {/* Identity is readable at rest — the field must communicate what it
           holds without the reader hovering twelve objects to find out. The

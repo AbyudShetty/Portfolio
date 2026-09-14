@@ -65,7 +65,7 @@ const FOLLOW = {
  * is faded in by opacity across the approach, so the sky simply deepens.
  */
 const DEEP_COUNT = 3400;
-const DEEP_FADE = { start: progressAt(340), end: progressAt(560) };
+const DEEP_FADE = { start: progressAt(620), end: progressAt(840) };
 const DEEP_OPACITY = 0.62;
 
 /** A soft round point, generated rather than downloaded. */

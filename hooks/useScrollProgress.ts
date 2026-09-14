@@ -33,7 +33,7 @@ import {
  */
 export const scroll = {
   progress: 0,
-  sections: { landing: 0, experience: 0, projects: 0 } as Record<
+  sections: { landing: 0, about: 0, experience: 0, projects: 0, ending: 0 } as Record<
     SectionId,
     number
   >,

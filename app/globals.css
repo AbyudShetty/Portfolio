@@ -52,8 +52,10 @@
      overlays so their timing matches the camera's without React re-rendering
      sixty times a second. */
   --p-landing: 0;
+  --p-about: 0;
   --p-experience: 0;
   --p-projects: 0;
+  --p-ending: 0;
 
   color-scheme: dark;
 }
@@ -243,6 +245,18 @@ body[data-custom-cursor="true"] * {
   transform-origin: left;
 }
 
+/*
+   Credits — the landing, returned. The ending section's scroll runs 1060vh →
+   1410vh of document (its local progress tops out at ~0.78 at the page's
+   end). The camera dives into the black hole, which finishes fading at ~0.69; the
+   name arrives just after, by ~0.76, and holds to the bottom of the page.
+*/
+.credits {
+  justify-items: center;
+  text-align: center;
+  opacity: clamp(0, calc((var(--p-ending) - 0.69) / 0.07), 1);
+}
+
 .landing__cue {
   margin: 0;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
@@ -267,8 +281,32 @@ body[data-custom-cursor="true"] * {
 }
 
 .experience__panel {
-  max-width: 30rem;
+  /* Wide rather than tall: at 42rem the six-stage signal path sits on one
+     line and the points keep a short, readable column. The astronaut's
+     drift is limited in ExperienceComposition so the figure stays clear of
+     this wider left edge. */
+  position: relative;
+  max-width: 42rem;
   pointer-events: auto;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* A feathered darkening behind the text for when a stone or the figure's
+   suit passes behind a line — sized to its sides so it never reads as a
+   panel, the same wash the About section uses. */
+.experience__panel::before {
+  content: "";
+  position: absolute;
+  inset: -14% -12%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse farthest-side at 50% 50%,
+    rgba(5, 6, 7, 0.66) 0%,
+    rgba(5, 6, 7, 0.52) 45%,
+    rgba(5, 6, 7, 0.2) 75%,
+    transparent 100%
+  );
 }
 
 .kicker {
@@ -295,15 +333,49 @@ body[data-custom-cursor="true"] * {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: var(--text-tertiary);
+  color: var(--signal);
+}
+
+/* Points, marked with the same short orange rule as "Along the way". */
+.experience__points {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+.experience__point {
+  position: relative;
+  padding-left: 22px;
+  max-width: 64ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.experience__point::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 12px;
+  height: 1px;
+  background: var(--signal);
 }
 
 .experience__summary {
-  margin: 0 0 28px;
+  margin: 0 0 14px;
   max-width: 52ch;
   font-size: 15px;
   line-height: 1.65;
   color: var(--text-secondary);
+}
+
+/* The last paragraph keeps the larger gap before the pipeline, so the three
+   read as one block and the diagram as the next thing. */
+.experience__summary:last-of-type {
+  margin-bottom: 26px;
 }
 
 /* The signal path, as a chain of instrument labels rather than a diagram. */
@@ -640,16 +712,20 @@ body[data-custom-cursor="true"] * {
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--signal);
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
 }
 
+/* Hover raises prominence through the label's opacity; the domain keeps its
+   colour rather than stepping to grey. */
 .pebble-label[data-state="hover"] .pebble-label__meta {
-  color: var(--text-secondary);
+  color: var(--signal);
 }
 
+/* The coordinate sits a shade under the domain: the same orange, very
+   slightly darkened, so the pair reads as one line with a clear lead word. */
 .pebble-label__code {
-  color: var(--text-disabled);
+  color: color-mix(in srgb, var(--signal) 86%, black);
 }
 
 /* ============================================================================

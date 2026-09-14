@@ -13,19 +13,13 @@ import "./SpecimenPanel.css";
 /**
  * SpecimenPanel — what the stone says once it is at the lens.
  *
- * Plain centred DOM rather than an `Html` anchored to the object. The stone
- * always travels to the same station in camera space (see `specimen.ts`), so
- * its position on screen is a constant, and a fixed overlay lands on it every
- * time without chasing a 3D anchor. That also keeps the panel as real,
- * focusable, selectable, translatable document content — a `<dialog>`-shaped
- * thing with headings and links, not text baked into a transformed layer.
- *
- * It sits *inside* the stone's silhouette, not beside it. The stone fills
- * roughly two thirds of the frame behind the panel, so its edges, its
- * clearcoat catch and the field beyond it stay visible all the way round.
- * The glass ground underneath the text is what makes that survivable: the
- * stone refracts a moving starfield, and body copy laid straight onto it
- * would be unreadable half the time.
+ * On desktop the words themselves are engraved into the stone (see
+ * projects/engraving.ts), so they arrive with it instead of ahead of it. This
+ * component keeps the same content as real document text — visually hidden
+ * there, still read by screen readers and focusable as a dialog — and owns
+ * the things a texture cannot be: the repository link, close, and moving
+ * between projects. Those sit below the stone and appear only once it has
+ * arrived. On narrow screens there is no stone, so the text is shown.
  *
  * Kept short by design (§10.4 is a bigger surface; this is not it). Two or
  * three points, the stack, and the repository. Anyone who wants the rest can
@@ -131,18 +125,6 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
            instead of the new text sliding in under the old. */
         key={record.id}
       >
-        {/* A real control, not just the scrim behind. On a narrow screen the
-            panel is nearly the whole width, so "tap outside" stops being a
-            reachable target. */}
-        <button
-          type="button"
-          className="specimen__close"
-          aria-label="Close project"
-          onClick={close}
-        >
-          <span aria-hidden="true">×</span>
-        </button>
-
         <header className="specimen__head">
           <span className="specimen__eyebrow">
             <span
@@ -174,29 +156,6 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
         </ul>
 
         <footer className="specimen__foot">
-          <div className="specimen__links">
-            <a
-              className="specimen__link"
-              href={repoUrl(record)}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              View on GitHub
-              <span aria-hidden="true">↗</span>
-            </a>
-            {record.demo ? (
-              <a
-                className="specimen__link"
-                href={record.demo}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Live demo
-                <span aria-hidden="true">↗</span>
-              </a>
-            ) : null}
-          </div>
-
           {record.status.length > 0 ? (
             <p className="specimen__status">
               {record.status.map((s) => s.label).join(" · ")}
@@ -224,29 +183,60 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
         →
       </button>
 
-      <nav className="specimen__adjacent" aria-label="Adjacent work">
-        <span className="specimen__adjacent-title">Adjacent</span>
-        {adjacent.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className="specimen__adjacent-item"
-            onClick={() => fieldActions.select(item.id)}
+      {/* Below the stone, and only once it has arrived (--specimen-presence):
+          the controls must never be on screen before the thing they act on. */}
+      <div className="specimen__footer">
+        <div className="specimen__actions">
+          <a
+            className="specimen__link"
+            href={repoUrl(record)}
+            target="_blank"
+            rel="noreferrer noopener"
           >
-            <span
-              className="specimen__accent"
-              style={{ background: DOMAIN_ACCENT[item.domain] }}
-              aria-hidden="true"
-            />
-            {item.shortName ?? item.name}
+            View on GitHub
+            <span aria-hidden="true">↗</span>
+          </a>
+          {record.demo ? (
+            <a
+              className="specimen__link"
+              href={record.demo}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Live demo
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
+          <button type="button" className="specimen__return" onClick={close}>
+            Close
+            <span aria-hidden="true">×</span>
           </button>
-        ))}
-      </nav>
+        </div>
 
-      <p className="specimen__hint">
-        <kbd>←</kbd>
-        <kbd>→</kbd> to move between projects · <kbd>Esc</kbd> to return
-      </p>
+        <nav className="specimen__adjacent" aria-label="Adjacent work">
+          <span className="specimen__adjacent-title">Adjacent</span>
+          {adjacent.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className="specimen__adjacent-item"
+              onClick={() => fieldActions.select(item.id)}
+            >
+              <span
+                className="specimen__accent"
+                style={{ background: DOMAIN_ACCENT[item.domain] }}
+                aria-hidden="true"
+              />
+              {item.shortName ?? item.name}
+            </button>
+          ))}
+        </nav>
+
+        <p className="specimen__hint">
+          <kbd>←</kbd>
+          <kbd>→</kbd> to move between projects · <kbd>Esc</kbd> to return
+        </p>
+      </div>
     </div>
   );
 }

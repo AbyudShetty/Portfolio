@@ -60,6 +60,14 @@ const ANCHOR_INSET = 7.2;
 export const ENDURANCE_RING_RADIUS = 35.3 * ENDURANCE_SCALE;
 
 /**
+ * How far the structure reaches from the hub, in world units: the model's
+ * measured half-extent across the ring (±43.68), which includes the modules
+ * standing proud of the ring line. The axial half-length is only 22.6, so a
+ * sphere of this radius contains the whole craft at any spin angle.
+ */
+export const ENDURANCE_EXTENT_RADIUS = 43.7 * ENDURANCE_SCALE;
+
+/**
  * Radial rotation, in radians per second. Independent of scroll: scroll says
  * where the craft is, time says where the ring has turned to. At ~1.9°/s a
  * full revolution takes just over three minutes — read for a few seconds and

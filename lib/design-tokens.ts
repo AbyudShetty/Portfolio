@@ -30,6 +30,7 @@ export const SIGNAL = {
 export const DOMAIN_ACCENT = {
   ai: "#B4694A", // Oxide
   graphics: "#CBC3B4", // Bone
+  simulation: "#9A8F7E", // Sandstone — BioGears-backed physiological simulation
   xr: "#8FA0AC", // Aluminium
   systems: "#6E8264", // Moss
   research: "#A88C4E", // Brass
@@ -41,6 +42,7 @@ export const DOMAIN_LABEL = {
   research: "RESEARCH",
   ai: "AI / ML",
   graphics: "GRAPHICS",
+  simulation: "SIMULATION",
   xr: "XR / SPATIAL",
   systems: "SYSTEMS",
   product: "PRODUCT",

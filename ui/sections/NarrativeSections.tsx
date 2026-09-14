@@ -28,7 +28,7 @@ const PIPELINE = [
   "3D AVATAR",
 ];
 
-const SOCIALS = [
+export const SOCIALS = [
   { label: "GitHub", href: "https://github.com/AbyudShetty" },
   {
     label: "LinkedIn",
@@ -87,10 +87,15 @@ export function ExperienceSection() {
             {record.name}
           </h2>
           <p className="experience__meta">
-            {record.org ? `${record.org} · ` : ""}Internship · {record.year} ·{" "}
-            {record.status.map((s) => s.label).join(" · ")}
+            {record.org ? `${record.org} · ` : ""}Internship · {record.year}
           </p>
-          <p className="experience__summary">{record.summary}</p>
+          <ul className="experience__points">
+            {(record.narrative ?? [record.summary]).map((point) => (
+              <li key={point} className="experience__point">
+                {point}
+              </li>
+            ))}
+          </ul>
 
           <h3 className="sr-only">Pipeline</h3>
           <ol className="pipeline" aria-label="Signal path">
@@ -106,6 +111,43 @@ export function ExperienceSection() {
               <li key={tech}>{tech}</li>
             ))}
           </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The closing credits — the landing again, after everything has gone into the
+ * black hole. Same name, same two links, set in the landing's own styles, and
+ * nothing else: the page ends where it began.
+ */
+export function EndingSection() {
+  return (
+    <section
+      id="ending"
+      className="section section--ending"
+      style={{ height: `${SECTION_VH.ending}vh` }}
+      aria-labelledby="credits-heading"
+    >
+      <div className="section__sticky credits">
+        <h2 id="credits-heading" className="landing__name">
+          Abyud Shetty
+        </h2>
+        <div className="landing__meta">
+          <nav className="landing__links" aria-label="Profiles">
+            {SOCIALS.map((social) => (
+              <a
+                key={social.label}
+                className="landing__link"
+                href={social.href}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {social.label}
+              </a>
+            ))}
+          </nav>
         </div>
       </div>
     </section>
