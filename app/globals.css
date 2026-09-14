@@ -983,3 +983,35 @@ body[data-custom-cursor="true"] * {
     display: none;
   }
 }
+
+/* ── Interface scale ─────────────────────────────────────────────────────
+   The site was composed at 80% browser zoom, so at 100% every line of text
+   and interface ran a size too large for the scene behind it. This restores
+   that composition as the default.
+
+   Only the overlays are scaled, never the canvas or the sections: section
+   heights are the scroll timeline (cameraChoreography.ts measures them in
+   vh), and the scene already frames itself to the viewport. Zoom goes on
+   what sits *inside* each positioned layer, so sticky and fixed containers
+   keep their real size and position, and things placed by transform — the
+   cursor, the stone labels — stay exactly where they are placed.
+   Desktop only; the mobile telling is laid out for its own screen.
+*/
+@media (min-width: 768px) {
+  :root {
+    --ui-scale: 0.8;
+  }
+
+  .section__sticky > *,
+  .rail,
+  .pebble-label,
+  .cursor > *,
+  .specimen__footer,
+  .specimen__step,
+  .specimen__close,
+  .static-projects,
+  .fallback {
+    zoom: var(--ui-scale);
+  }
+}
+
