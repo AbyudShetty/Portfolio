@@ -12,6 +12,7 @@ import {
   STATIC_FRAME_PROGRESS,
   sampleCamera,
 } from "./cameraChoreography";
+import { fovForAspect, portraitMix } from "./viewport";
 
 const _target = new THREE.Vector3();
 
@@ -33,6 +34,7 @@ export function ScrollCameraRig({
   reducedMotion: boolean;
 }) {
   const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
   const reportFrame = useFrameReporter();
   const current = useRef({
     position: new THREE.Vector3(),
@@ -45,7 +47,15 @@ export function ScrollCameraRig({
 
     // Reduced motion holds one composed frame rather than travelling (§6.3).
     const progress = reducedMotion ? STATIC_FRAME_PROGRESS : scroll.progress;
-    const sampled = sampleCamera(progress);
+    // Framed for the shape of the screen (scene/viewport.ts).
+    const aspect = size.width / Math.max(1, size.height);
+    const perspective = camera as THREE.PerspectiveCamera;
+    const fov = fovForAspect(aspect);
+    if (Math.abs(perspective.fov - fov) > 0.01) {
+      perspective.fov = fov;
+      perspective.updateProjectionMatrix();
+    }
+    const sampled = sampleCamera(progress, portraitMix(aspect));
     const state = current.current;
     if (cameraSnap.pending) {
       cameraSnap.pending = false;

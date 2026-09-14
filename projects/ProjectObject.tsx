@@ -16,6 +16,7 @@ import { scroll } from "@/hooks/useScrollProgress";
 import { layerBehindEndurance } from "@/experience/enduranceLayer";
 import { FIELD_OPTICS } from "@/scene/cameraChoreography";
 import { ENDING, fallInto, windowProgress } from "@/scene/ending";
+import { portraitMix } from "@/scene/viewport";
 import {
   convergeFactor,
   easeOutCubic,
@@ -256,7 +257,7 @@ export function ProjectObject({
     [],
   );
 
-  useFrame((_, delta) => {
+  useFrame((frame, delta) => {
     const g = group.current;
     if (!g) return;
 
@@ -282,10 +283,17 @@ export function ProjectObject({
     const endingStarted = !reducedMotion && progress > ENDING.labelsOut.start;
     if (endingStarted !== ending) setEnding(endingStarted);
     const s = coordinate.scattered;
-    const gth = coordinate.gathered;
-    const baseX = s[0] + (gth[0] - s[0]) * converge;
-    const baseY = s[1] + (gth[1] - s[1]) * converge;
-    const baseZ = s[2] + (gth[2] - s[2]) * converge;
+    // Where home is depends on the screen: the landscape puddle, or the
+    // portrait rows, blended (projectCoordinates.ts).
+    const portrait = portraitMix(frame.size.width / Math.max(1, frame.size.height));
+    const land = coordinate.gathered;
+    const tall = coordinate.portrait;
+    const gth0 = land[0] + (tall[0] - land[0]) * portrait;
+    const gth1 = land[1] + (tall[1] - land[1]) * portrait;
+    const gth2 = land[2] + (tall[2] - land[2]) * portrait;
+    const baseX = s[0] + (gth0 - s[0]) * converge;
+    const baseY = s[1] + (gth1 - s[1]) * converge;
+    const baseZ = s[2] + (gth2 - s[2]) * converge;
 
     // Arrival: the specimen travels in from further out along its own
     // sight-line rather than fading up in place.
@@ -410,7 +418,12 @@ export function ProjectObject({
         .add(camera.position);
 
       g.position.lerpVectors(_field, _station, present);
-      const presentScale = fieldScale + (STATION.scale - fieldScale) * present;
+      // Held larger on a portrait screen, so the engraving stays readable
+      // across the narrower frame.
+      const stationScale =
+        STATION.scale *
+        (1 + 0.25 * portraitMix(frame.size.width / Math.max(1, frame.size.height)));
+      const presentScale = fieldScale + (stationScale - fieldScale) * present;
       g.scale.setScalar(presentScale);
 
       // Turn the broad face to the lens. Slerped from rest rather than set,

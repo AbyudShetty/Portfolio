@@ -505,19 +505,24 @@
    is simply a card, and the controls that only make sense against a field go
    away: the arrows sat in frame margins that no longer exist.
 */
+/*
+   Phones: the stone fills the width, so the arrows move from the frame's
+   sides to just above the footer, and the keyboard hint and adjacent list —
+   both too wide and meaningless without a keyboard — go.
+*/
 @media (max-width: 720px) {
-  .specimen {
-    padding: 20px;
-  }
-
-  .specimen__panel {
-    width: 100%;
-    max-height: 82vh;
-    overflow-y: auto;
-  }
-
   .specimen__step {
-    display: none;
+    top: auto;
+    bottom: max(78px, 11vh);
+    translate: none;
+  }
+
+  .specimen__step--prev {
+    left: 20px;
+  }
+
+  .specimen__step--next {
+    right: 20px;
   }
 
   .specimen__adjacent,
@@ -535,18 +540,16 @@
    visually hidden but kept for screen readers (the same technique as
    .sr-only). Narrow screens have no stone and keep the visible panel.
 */
-@media (min-width: 721px) {
-  .specimen__panel {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    pointer-events: none;
-  }
+.specimen__panel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /*
@@ -603,40 +606,14 @@
   outline-offset: 3px;
 }
 
-/*
-   No stone on narrow screens, so nothing publishes --specimen-presence: the
-   text and controls must not wait for an arrival that never happens.
-*/
-@media (max-width: 720px) {
-  .specimen__panel > * {
-    opacity: 1;
-    transform: none;
-  }
-
-  .specimen__footer {
-    position: static;
-    translate: none;
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* ── Repository and live-demo links ──────────────────────────────────────
    Engraved on the stone on desktop as marks beside the name
    (projects/engraving.ts), so the footer's copies go; mobile has no stone
    and keeps them. The panel's own copy is for
    assistive tech on desktop and would only duplicate the footer on mobile. */
-@media (min-width: 721px) {
-  .specimen__link--repo,
-  .specimen__link--demo {
-    display: none;
-  }
-}
-
-@media (max-width: 720px) {
-  .specimen__repo {
-    display: none;
-  }
+.specimen__link--repo,
+.specimen__link--demo {
+  display: none;
 }
 
 /* Over the engraved link, the reticle takes the signal colour. */

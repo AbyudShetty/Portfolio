@@ -28,6 +28,14 @@ export interface Coordinate {
   scattered: [number, number, number];
   /** Where it settles in the final field. */
   gathered: [number, number, number];
+  /**
+   * Where it settles on a portrait screen. The landscape puddle is wide and
+   * shallow, which an upright frame can only show as a small cluster; this is
+   * the same thirteen stones in five staggered rows (3 / 2 / 3 / 2 / 3) that
+   * run down the screen instead of across it. Blended in by how portrait the
+   * screen is (scene/viewport.ts).
+   */
+  portrait: [number, number, number];
 }
 
 /** Centre of the settled puddle; the overhead keyframe looks here. */
@@ -52,6 +60,7 @@ export const COORDINATES: Record<string, Coordinate> = {
     code: "EXP-00",
     scattered: [-2.2, 0.15, 0],
     gathered: [-2.2, 0.15, 0],
+    portrait: [-2.2, 0.15, 0],
   },
 
   // ── Front row (4) ───────────────────────────────────────────────────────
@@ -59,21 +68,25 @@ export const COORDINATES: Record<string, Coordinate> = {
     code: "XR-01",
     scattered: [-16.5, 4.2, -30],
     gathered: [-4.27, 0.42, -22.88],
+    portrait: [-3.6, 0.35, -19.8],
   },
   cardiotriage: {
     code: "SIM-02",
     scattered: [7.5, 5.6, -21],
     gathered: [-1.5, 0.55, -21.79],
+    portrait: [0.1, 0.5, -20.1],
   },
   aegis: {
     code: "SYS-01",
     scattered: [18.5, 2.4, -33],
     gathered: [1.48, 0.38, -21.88],
+    portrait: [3.6, 0.3, -19.7],
   },
   affordability: {
     code: "AI-04",
     scattered: [-2.5, 8.8, -37],
     gathered: [4.22, 0.1, -23.03],
+    portrait: [-1.8, 0.15, -23.2],
   },
 
   // ── Middle row (4) ──────────────────────────────────────────────────────
@@ -81,21 +94,25 @@ export const COORDINATES: Record<string, Coordinate> = {
     code: "AI-01",
     scattered: [-20, -3.5, -25],
     gathered: [-5.97, 0.18, -25.33],
+    portrait: [1.9, 0.2, -23.4],
   },
   astronaut: {
     code: "SIM-01",
     scattered: [-9, 6.5, -44],
     gathered: [-1.99, 0.62, -24.99],
+    portrait: [-3.7, 0.5, -26.5],
   },
   msgrouter: {
     code: "AI-02",
     scattered: [12, -5.2, -38],
     gathered: [1.66, 0.3, -24.94],
+    portrait: [0, 0.3, -26.8],
   },
   miniraft: {
     code: "SYS-02",
     scattered: [22, 5.5, -27],
     gathered: [4.6, 0.22, -25.98],
+    portrait: [3.6, 0.2, -26.4],
   },
 
   // ── Back row (5) ────────────────────────────────────────────────────────
@@ -103,26 +120,31 @@ export const COORDINATES: Record<string, Coordinate> = {
     code: "RES-01",
     scattered: [-24, 1.8, -47],
     gathered: [-6.77, -0.15, -28.19],
+    portrait: [-1.9, -0.1, -30.1],
   },
   medivault: {
     code: "AI-03",
     scattered: [-13, -6.2, -34],
     gathered: [-3.69, 0.1, -28.11],
+    portrait: [1.8, 0.1, -29.9],
   },
   ipl: {
     code: "PRD-01",
     scattered: [4, -7.5, -50],
     gathered: [-0.72, -0.05, -27.78],
+    portrait: [-3.6, 0, -33.2],
   },
   realitycompiler: {
     code: "PRD-02",
     scattered: [16, 7.2, -46],
     gathered: [2.51, 0.15, -28.09],
+    portrait: [0, 0.15, -33.5],
   },
   hcrm: {
     code: "PRD-03",
     scattered: [25, -2.6, -40],
     gathered: [7.09, -0.2, -27.62],
+    portrait: [3.7, -0.15, -33.1],
   },
 };
 

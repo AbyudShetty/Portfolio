@@ -170,6 +170,13 @@ export function SpaceScene() {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
+  // Touch devices render a little under full density: the black hole and
+  // the glass are per-pixel work, and a phone's 3× screen triples it.
+  const coarsePointer = useMemo(
+    () => window.matchMedia("(pointer: coarse)").matches,
+    [],
+  );
+
   const glSettings = useMemo(
     () => ({
       antialias: true,
@@ -192,7 +199,7 @@ export function SpaceScene() {
           // switches to it. Demand renders only on change, so it still costs
           // nothing in the background.
           frameloop={visible ? "always" : "demand"}
-          dpr={[1, 1.75]}
+          dpr={coarsePointer ? [1, 1.5] : [1, 1.75]}
           gl={glSettings}
           camera={{
             fov: 42,

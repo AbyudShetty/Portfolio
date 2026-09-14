@@ -66,11 +66,19 @@ export function useScrollProgress(): SectionId {
       viewportHeight = window.innerHeight;
       const unit = viewportHeight / 100;
       scrollable = Math.max(1, root.scrollHeight - viewportHeight);
-      bounds = SECTION_ORDER.map((id) => ({
-        id,
-        start: sectionStartVh(id) * unit,
-        height: SECTION_VH[id] * unit,
-      }));
+      bounds = SECTION_ORDER.map((id) => {
+        // Measured from the section itself where it exists. On phones CSS
+        // `vh` is the toolbar-hidden height while innerHeight is not, so
+        // arithmetic from vh would drift a few percent per section.
+        const el = document.getElementById(id);
+        return el
+          ? { id, start: el.offsetTop, height: el.offsetHeight }
+          : {
+              id,
+              start: sectionStartVh(id) * unit,
+              height: SECTION_VH[id] * unit,
+            };
+      });
     };
 
     const read = () => {

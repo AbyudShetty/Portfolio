@@ -284,3 +284,55 @@
   gap: 40px;
   text-shadow: none;
 }
+
+/* ── Phones: the three beats take turns ─────────────────────────────────────
+   Three columns cannot stand side by side on a phone, and stacked they are
+   taller than the screen. So they share one pinned frame and hand over:
+   who (to 16%), where from (19–36%), what along the way (from 39% until the
+   section releases at 64%). The line still draws upward as its stops land. */
+@media (max-width: 767px) {
+  .about__grid[data-staged="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .about__grid[data-staged="true"] > .about__beat {
+    grid-area: 1 / 1;
+  }
+
+  .about__grid[data-staged="true"]::before {
+    inset: -10% -12%;
+  }
+
+  .about__statement {
+    font-size: 30px;
+    margin-bottom: 18px;
+  }
+
+  .about__paragraph {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .about__grid[data-staged="true"] .about__intro {
+    --at: 0.02 !important;
+    opacity: calc(
+      var(--r) * (1 - clamp(0, calc((var(--p-about) - 0.16) / 0.03), 1))
+    );
+  }
+
+  .about__grid[data-staged="true"] .about__education {
+    --at: 0.19 !important;
+    opacity: calc(
+      var(--r) * (1 - clamp(0, calc((var(--p-about) - 0.36) / 0.03), 1))
+    );
+  }
+
+  .about__grid[data-staged="true"] .about__highlights {
+    --at: 0.39 !important;
+  }
+
+  .about__grid[data-staged="true"] .timeline {
+    --draw: clamp(0, calc((var(--p-about) - 0.2) / 0.12), 1);
+  }
+}

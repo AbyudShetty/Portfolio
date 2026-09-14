@@ -1015,3 +1015,95 @@ body[data-custom-cursor="true"] * {
   }
 }
 
+/* ── Phones ─────────────────────────────────────────────────────────────────
+   The journey is the same; the frame is upright. The camera composes the
+   figure in the upper half on a portrait screen (cameraChoreography.ts), so
+   the Experience text sits in the lower half. Field labels keep only the
+   name: thirteen of them share a narrow frame. */
+@media (max-width: 767px) {
+  .experience {
+    justify-items: stretch;
+    align-content: end;
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+
+  .experience__panel {
+    max-width: none;
+  }
+
+  /* Darker than on desktop: on an upright screen the craft's orbit passes
+     behind the lower half, where the words are. */
+  .experience__panel::before {
+    inset: -16% -14%;
+    background: radial-gradient(
+      ellipse farthest-side at 50% 58%,
+      rgba(5, 6, 7, 0.9) 0%,
+      rgba(5, 6, 7, 0.8) 55%,
+      rgba(5, 6, 7, 0.34) 84%,
+      transparent 100%
+    );
+  }
+
+  .experience__title {
+    font-size: 26px;
+  }
+
+  .experience__meta {
+    margin-bottom: 14px;
+  }
+
+  .experience__points {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .experience__point {
+    padding-left: 16px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .experience__point::before {
+    width: 10px;
+  }
+
+  /* The pipeline already names the stack; one of the two is enough here. */
+  .experience .stack {
+    display: none;
+  }
+
+  .pipeline {
+    gap: 6px 12px;
+    margin-bottom: 10px;
+  }
+
+  .pipeline__stage,
+  .stack li {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+
+  .projects__heading {
+    padding-top: 60px;
+  }
+
+  .projects__title {
+    font-size: 26px;
+  }
+
+  .pebble-label__name {
+    font-size: 10.5px;
+  }
+
+  .pebble-label__meta {
+    display: none;
+  }
+}
+
+/* Nothing may widen the page sideways — a label anchored near the edge of the
+   scene, or the specimen's off-screen copy. `clip`, not `hidden`, so the
+   sticky sections keep working. */
+html,
+body {
+  overflow-x: clip;
+}

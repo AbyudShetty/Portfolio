@@ -9,11 +9,10 @@ import {
 } from "@/hooks/usePerformanceTier";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
-import { useIsMobile, useMounted } from "@/hooks/useViewport";
+import { useMounted } from "@/hooks/useViewport";
 import { useReliveAtEnd } from "@/ui/relive";
 import { FieldFallback } from "@/ui/FieldFallback";
 import { InstrumentCursor } from "@/ui/InstrumentCursor";
-import { MobileNarrative } from "@/ui/MobileNarrative";
 import { ProjectList } from "@/ui/ProjectList";
 import { SpecimenPanel } from "@/ui/SpecimenPanel";
 import { TopRail } from "@/ui/TopRail";
@@ -43,32 +42,20 @@ const SpaceScene = dynamic(
 
 export default function Page() {
   const mounted = useMounted();
-  const isMobile = useIsMobile();
   const reducedMotion = useReducedMotion();
   const activeSection = useScrollProgress();
   const [capable, setCapable] = useState<boolean | null>(null);
 
   // The bottom of the page is a room of the tesseract; arriving there
   // returns the reader to the beginning.
-  useReliveAtEnd(mounted && !isMobile);
+  useReliveAtEnd(mounted);
 
   useEffect(() => {
     setCapable(detectWebGLSupport() && !prefersSaveData());
   }, []);
 
-  // Mobile is a different telling of the same content, not a scaled-down
-  // version of the scene.
-  if (mounted && isMobile) {
-    return (
-      <main className="page page--mobile">
-        <MobileNarrative />
-        {/* The list is the only way in here, and it selects — so the panel
-            has to exist on this path too, or the tap does nothing. */}
-        <SpecimenPanel reducedMotion={reducedMotion} />
-        <div className="relive-flash" aria-hidden="true" />
-      </main>
-    );
-  }
+  // Phones get the same journey as everything else, framed for the screen
+  // (scene/viewport.ts) — not a separate, stripped-down page.
 
   // No WebGL: the narrative still reads, in full.
   if (mounted && capable === false) {

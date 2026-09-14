@@ -5,6 +5,7 @@ import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { ENVIRONMENT } from "@/lib/design-tokens";
+import { createFader } from "./fade";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { scroll } from "@/hooks/useScrollProgress";
 import { progressAt } from "@/scene/cameraChoreography";
@@ -19,6 +20,7 @@ import {
   CRAFT_ENTER,
   PHASE_A_END,
   STATIC_MOMENT,
+  SPAWN_FADE,
   TETHER_FADE,
   windowProgress,
 } from "./sequence";
@@ -172,6 +174,7 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
     new THREE.Vector3(),
   ]);
   const settled = useRef(false);
+  const fadeCraft = useMemo(() => createFader(), []);
 
   useFrame((_, delta) => {
     const group = carrier.current;
@@ -195,6 +198,14 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
       return;
     }
     if (!group.visible) group.visible = true;
+
+    // Fades in with the figure and the cable (SPAWN_FADE); whole again for
+    // its return in the ending.
+    const spawn =
+      reducedMotion || inEnding
+        ? 1
+        : smoothstep01(windowProgress(progress, SPAWN_FADE));
+    fadeCraft(group, spawn);
 
     // Waypoints give timing, the spline gives the path: the craft can be slow
     // here and quick there without the trajectory itself ever kinking.
@@ -264,7 +275,7 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
     }
     if (!tube.visible) tube.visible = true;
     // The cable dims away with the figure instead of being switched off.
-    cableMaterial.opacity = tetherFade;
+    cableMaterial.opacity = tetherFade * spawn;
 
     // The Ranger hardpoint, live — this is the value that carries the ring's
     // rotation into the cable.

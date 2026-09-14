@@ -13,7 +13,9 @@ import {
   ASTRONAUT_ENTER,
   ASTRONAUT_EXIT,
   ASTRONAUT_HOLD,
+  SPAWN_FADE,
   STATIC_MOMENT,
+  TETHER_FADE,
   windowProgress,
 } from "./sequence";
 import {
@@ -86,6 +88,48 @@ export function ExperienceComposition({
   const socket = useRef<THREE.Object3D>(null);
   const settled = useRef(false);
 
+  /*
+    The figure's materials, with their authored transparency, so it can fade
+    out with the cable instead of disappearing while the cable is still
+    visible. Collected once the model has loaded.
+  */
+  const materials = useRef<
+    { material: THREE.Material; transparent: boolean; opacity: number }[] | null
+  >(null);
+  const faded = useRef(1);
+
+  const applyFade = (g: THREE.Group, value: number) => {
+    if (!materials.current) {
+      const list: { material: THREE.Material; transparent: boolean; opacity: number }[] = [];
+      g.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const own = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const material of own) {
+          if (list.some((entry) => entry.material === material)) continue;
+          list.push({
+            material,
+            transparent: material.transparent,
+            opacity: material.opacity,
+          });
+        }
+      });
+      if (list.length === 0) return;
+      materials.current = list;
+    }
+    if (Math.abs(value - faded.current) < 0.001) return;
+    const fading = value < 0.999;
+    for (const entry of materials.current) {
+      const transparent = entry.transparent || fading;
+      if (entry.material.transparent !== transparent) {
+        entry.material.transparent = transparent;
+        entry.material.needsUpdate = true;
+      }
+      entry.material.opacity = entry.opacity * value;
+    }
+    faded.current = value;
+  };
+
   useFrame((_, delta) => {
     const g = group.current;
     if (!g) return;
@@ -103,6 +147,7 @@ export function ExperienceComposition({
     const craftFall = reducedMotion ? 0 : endingWindow(progress, ENDING.craftFall);
     if (craftFall > 0 && craftFall < 1) {
       if (!g.visible) g.visible = true;
+      applyFade(g, 1);
       const size = fallInto(
         g.position,
         ASTRONAUT_ENTRY,
@@ -119,17 +164,26 @@ export function ExperienceComposition({
       return;
     }
 
-    // Absent from the hero, and gone once it has left the frame.
-    if (enter <= 0.001 || exit >= 0.999) {
+    // Leaves with the cable: the figure fades on the tether's own window and
+    // stays until that fade is done, so the cable never trails off a figure
+    // that has already gone.
+    const fade = reducedMotion
+      ? 1
+      : 1 - smoothstep01(windowProgress(progress, TETHER_FADE));
+
+    // Absent from the hero, and gone once it has faded out with the cable.
+    if (enter <= 0.001 || fade <= 0.002) {
       if (g.visible) g.visible = false;
       settled.current = false;
-      // Only invalidated before arrival. Through the exit the anchor stays
-      // live, so the cable can fade out with the figure rather than being
-      // cut the instant it hides.
-      if (enter <= 0.001) anchors.astronautReady = false;
+      anchors.astronautReady = false;
       return;
     }
     if (!g.visible) g.visible = true;
+    // Fades in with the craft and the cable, out with the cable.
+    const spawn = reducedMotion
+      ? 1
+      : smoothstep01(windowProgress(progress, SPAWN_FADE));
+    applyFade(g, Math.min(spawn, fade));
 
     // Entrance drifts up and forward into place; the hold eases toward the
     // lens; the drift carries it right just before it leaves.
@@ -159,7 +213,9 @@ export function ExperienceComposition({
     // the socket does not exist yet, and the cable simply waits for it.
     if (socket.current) {
       socket.current.getWorldPosition(anchors.astronaut);
-      anchors.astronautReady = enter > 0.05;
+      // Attached from the first visible frame, the same threshold the figure
+      // and the Endurance appear at — all three arrive together.
+      anchors.astronautReady = true;
     } else {
       anchors.astronautReady = false;
     }

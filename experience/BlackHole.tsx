@@ -143,9 +143,9 @@ const fragmentShader = /* glsl */ `
     vec3 hit = p;
     bool hasHit = false;
 
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < STEPS; i++) {
       float r = length(p);
-      float dt = clamp(0.07 * r, 0.03, 0.7);
+      float dt = clamp(STEP_K * r, 0.03, 0.7);
       v += (-1.5 * h2 * p / pow(r, 5.0)) * dt;
       vec3 next = p + v * dt;
 
@@ -197,9 +197,15 @@ export function BlackHole({ reducedMotion }: { reducedMotion: boolean }) {
       HOLE.normal.x, HOLE.normal.y, HOLE.normal.z,
       HOLE_V.x, HOLE_V.y, HOLE_V.z,
     );
+    // Phones trace with fewer, longer steps: the same picture to the eye at
+    // a fraction of the per-pixel cost.
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
     return new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
+      defines: coarse
+        ? { STEPS: 72, STEP_K: "0.11" }
+        : { STEPS: 120, STEP_K: "0.07" },
       uniforms: {
         uPresence: { value: 0 },
         uTime: { value: 0 },

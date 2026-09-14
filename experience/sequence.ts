@@ -28,6 +28,12 @@ export const CRAFT_ENTER = { start: progressAt(307), end: progressAt(376) };
  */
 export const ASTRONAUT_ENTER = { start: progressAt(307), end: progressAt(384) };
 
+/**
+ * The three of them — craft, figure and cable — fade in together over the
+ * first part of their arrival rather than appearing on a single frame.
+ */
+export const SPAWN_FADE = { start: progressAt(307), end: progressAt(340) };
+
 /** The long float in the middle of frame, between arrival and departure. */
 export const ASTRONAUT_HOLD = { start: progressAt(384), end: progressAt(484) };
 

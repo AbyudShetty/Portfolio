@@ -62,7 +62,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${newsreader.variable}`}
     >
-      <body>{children}</body>
+      {/* Browser extensions (Grammarly, password managers) write attributes
+          onto <body> before React hydrates; that is not a mismatch in the
+          site, so it is not reported as one. Applies to this tag only. */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

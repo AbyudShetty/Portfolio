@@ -71,6 +71,15 @@ export interface CameraKeyframe {
   at: number;
   position: [number, number, number];
   target: [number, number, number];
+  /**
+   * The same moment framed for a phone held upright (scene/viewport.ts),
+   * blended in by how portrait the screen is. Only where the landscape
+   * composition does not survive a narrow frame.
+   */
+  portrait?: {
+    position: [number, number, number];
+    target: [number, number, number];
+  };
 }
 
 /**
@@ -110,14 +119,30 @@ export const CAMERA_KEYFRAMES: CameraKeyframe[] = [
   { at: progressAt(300), position: [0.3, 1.08, 21.5], target: [0.32, 6.4, 5] },
 
   // Coming level as the approach continues.
-  { at: progressAt(430), position: [0.4, 1.05, 18], target: [0.4, 1.6, 2] },
+  {
+    at: progressAt(430),
+    position: [0.4, 1.05, 18],
+    target: [0.4, 1.6, 2],
+    portrait: { position: [0.55, 0.4, 11], target: [0.35, -2.8, -0.6] },
+  },
 
   // 02 — Experience. Aim is right of the astronaut, which places the figure
   // left of centre and leaves the right of the frame for the DOM panel.
-  { at: progressAt(520), position: [1.7, 0.85, 5.4], target: [0.5, 0.62, -0.6] },
+  // Portrait: the figure centred in the upper half, over the text below.
+  {
+    at: progressAt(520),
+    position: [1.7, 0.85, 5.4],
+    target: [0.5, 0.62, -0.6],
+    portrait: { position: [0.6, 0.1, 7.2], target: [0.35, -3.0, -0.6] },
+  },
 
   // Lift and pitch down. The pebbles are converging below and ahead.
-  { at: progressAt(650), position: [1.2, 8, -4], target: [0, 1, -17] },
+  {
+    at: progressAt(650),
+    position: [1.2, 8, -4],
+    target: [0, 1, -17],
+    portrait: { position: [0.8, 10.5, -1], target: [0, 0.5, -17] },
+  },
 
   // 03 — The gathered field, overhead.
   // Held lower than it used to climb (24 up). The stones finish gathering
@@ -125,19 +150,42 @@ export const CAMERA_KEYFRAMES: CameraKeyframe[] = [
   // exact moment the reader first sees the field assembled. At ~16 up the
   // field is ~1.4× larger on screen and still inside the footprint the layout
   // was solved against; the descent and the final frame are unchanged.
-  { at: progressAt(770), position: [0.3, 15.8, -15.2], target: [0, 0, -25.6] },
+  // Portrait frames look down on the portrait rows (projectCoordinates.ts),
+  // solved so the field fills a 390×844 screen edge to edge with room for
+  // every name: ~80–95px between neighbouring stones.
+  {
+    at: progressAt(770),
+    position: [0.3, 15.8, -15.2],
+    target: [0, 0, -25.6],
+    portrait: { position: [0, 18, -18.5], target: [0, 0, -26.5] },
+  },
 
   // Descent — the stones grow and resolve.
-  { at: progressAt(910), position: [0, 15, -16], target: [0, 0, -25.6] },
+  {
+    at: progressAt(910),
+    position: [0, 15, -16],
+    target: [0, 0, -25.6],
+    portrait: { position: [0, 14.5, -21], target: [0, 0, -26.5] },
+  },
 
   // Inspection level, low and among them.
   // Pinned at 960vh. This used to read 1060, which was past the end of the
   // page and so silently clamped to it; with the ending after it, it has to
   // name the real scroll position or the field ending would stretch.
-  { at: progressAt(960), position: [-1.6, 7.5, -17.5], target: [0.4, 0.2, -25.6] },
+  {
+    at: progressAt(960),
+    position: [-1.6, 7.5, -17.5],
+    target: [0.4, 0.2, -25.6],
+    portrait: { position: [0, 16, -24.5], target: [0, 0, -28] },
+  },
 
   // 04 — Ending. The field holds, still readable.
-  { at: progressAt(1010), position: [-1.6, 7.5, -17.5], target: [0.4, 0.2, -25.6] },
+  {
+    at: progressAt(1010),
+    position: [-1.6, 7.5, -17.5],
+    target: [0.4, 0.2, -25.6],
+    portrait: { position: [0, 16, -24.5], target: [0, 0, -28] },
+  },
 
   // Following the stones as they leave to the left.
   { at: progressAt(1090), position: [-20, 11, -14], target: [-45, 2, -45] },
@@ -172,7 +220,18 @@ const sampled = {
  * called every frame, and allocating two arrays per frame for the life of the
  * page is exactly the kind of waste that shows up as jank later.
  */
-export function sampleCamera(progress: number) {
+function blend(
+  frame: CameraKeyframe,
+  key: "position" | "target",
+  axis: number,
+  portrait: number,
+): number {
+  const base = frame[key][axis];
+  const alt = frame.portrait?.[key][axis];
+  return alt === undefined || portrait <= 0 ? base : base + (alt - base) * portrait;
+}
+
+export function sampleCamera(progress: number, portrait = 0) {
   const frames = CAMERA_KEYFRAMES;
   const p = Math.min(1, Math.max(0, progress));
 
@@ -185,10 +244,12 @@ export function sampleCamera(progress: number) {
   const local = span <= 0 ? 0 : smoothstep(Math.min(1, Math.max(0, (p - a.at) / span)));
 
   for (let axis = 0; axis < 3; axis++) {
-    sampled.position[axis] =
-      a.position[axis] + (b.position[axis] - a.position[axis]) * local;
-    sampled.target[axis] =
-      a.target[axis] + (b.target[axis] - a.target[axis]) * local;
+    const ap = blend(a, "position", axis, portrait);
+    const bp = blend(b, "position", axis, portrait);
+    const at = blend(a, "target", axis, portrait);
+    const bt = blend(b, "target", axis, portrait);
+    sampled.position[axis] = ap + (bp - ap) * local;
+    sampled.target[axis] = at + (bt - at) * local;
   }
 
   return sampled;
