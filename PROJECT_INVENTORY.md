@@ -1,6 +1,6 @@
 # Project Inventory — github.com/AbyudShetty
 
-Research pass over all 22 repositories on the GitHub profile, via the GitHub API (repo metadata, commit authorship, file trees, and READMEs). No source code was modified. Commit-authorship checks were used specifically to distinguish "forked and untouched" from "forked because it's a team project hosted on a teammate's account, with real authored contributions."
+Research pass over all 23 repositories on the GitHub profile (22 in the original pass, plus `affordability-forecast-agent` added in round 3), via the GitHub API (repo metadata, commit authorship, file trees, and READMEs). No source code was modified. Commit-authorship checks were used specifically to distinguish "forked and untouched" from "forked because it's a team project hosted on a teammate's account, with real authored contributions."
 
 > **User decision (confirmed, round 1):** the following 7 repositories are excluded from the portfolio outright: `AbyudShetty` (profile repo), `Ludo`, `Shell-Green-AI-Smart-Irrigation`, `Basic-chat-application`, `neetcode-submissions`, `claude-code`, `system_prompts_leaks`.
 >
@@ -10,6 +10,8 @@ Research pass over all 22 repositories on the GitHub profile, via the GitHub API
 > - `Cloth_Cutting_Mesh_Manipulation` is **excluded completely** — no longer pending/open, removed outright.
 >
 > Excluded count is now 9: the original 7 plus `IMU_Reconstruction` and `Cloth_Cutting_Mesh_Manipulation`. The remaining 12 project repositories stay open for consideration; `IMU-Reconstruction-SlimeVR` sits in its own Experience category, outside both the excluded list and the project hierarchy. Repos still carrying open questions (`Reality-Compiler`, `Astronaut_health_digital_twin`, `VRATA`) still need input, not exclusion, unless the user says otherwise.
+>
+> **User decision (confirmed, round 3 — 2026-09-14):** `affordability-forecast-agent`, uploaded by the user on 2026-09-13, is **marked for inclusion** on the website. It was inspected the same way as the rest (metadata, commit authorship, file tree, READMEs, problem statement, core source files, evaluation outputs). The included project count is now 13, plus the Experience entry; the excluded count stays at 9. Its tier placement below (Tier 2) is a recommendation, not a user decision.
 
 ---
 
@@ -39,6 +41,7 @@ Research pass over all 22 repositories on the GitHub profile, via the GitHub API
 | 20 | **claude-code** | Fork (codeaashu/claude-code — a third-party clone project, not the official Anthropic tool) | 0 / n/a | Untouched fork, 0 authored commits | Other |
 | 21 | **system_prompts_leaks** | Fork (asgeirtj) | 0 / n/a | Untouched reference fork of a public system-prompt archive | Other |
 | 22 | **AbyudShetty** (profile README repo) | No | n/a | GitHub profile README ("CS undergrad building intelligent systems across AI, ML, computer vision, immersive tech, simulations") | Other (meta) |
+| 23 | **affordability-forecast-agent** ("Buy or Wait?") | No (built on an organizer-supplied challenge scaffold) | 13 / 46 — all 13 solution commits are the user's; the other 33 are organizers' problem statement, dataset and template | Financial affordability agent for a "Buy or Wait?" challenge: reconstructs a user's cash position from transactions, messages and scanned images, forecasts the balance 90 days forward, and picks a safe payment plan (full / partial / installments / wait / decline). A deterministic engine computes every number; LLMs only extract evidence, which is re-validated against its source | AI / Systems — **Included** (round 3) |
 
 ---
 
@@ -67,6 +70,15 @@ Research pass over all 22 repositories on the GitHub profile, via the GitHub API
 - **Originality:** Original, single-author.
 - **Portfolio value:** High for demonstrating AI-systems judgment (deliberately keeping the LLM out of the final decision loop is a notable design choice) — less visual, better suited to a technical deep-dive page than a 3D hero.
 - **Status: Featured (as a technical/AI-engineering showcase, not a visual one).**
+
+### affordability-forecast-agent ("Buy or Wait?") — INCLUDED (round 3)
+- **Does:** Answers "can I actually afford this right now?" for 250 purchase requests. For each one it rebuilds the user's financial timeline (historical, pending and confirmed transactions; recurring vs one-off; duplicates, failed and cancelled records removed; income counted only on its settlement date), fills blank transaction amounts from linked images (payroll letters, bills, receipts, statements), forecasts the balance 90 days forward against the user's minimum-balance floor and protected expenses, and outputs a complete, ranked recommendation: `full_payment`, a two-payment `partial_payment`, an `installments` plan that must exactly match a supplied option, `wait` until a computed date, or `not_recommended` — plus up to three stop/reduce changes to flexible recurring expenses when nothing is safe without them.
+- **Tech:** Python 3.10+, standard library only for the pipeline (`Decimal` money, dataclasses); pytest. Modular engine — `engine/ledger.py` (past/future/excluded), `recurrence.py` (structure-only pattern detection: day-step chains and monthly runs), `forecast.py` (90-day balance), `capacity.py` (safe amount, earliest date), `decide.py` (eligibility, installments, partial, spending-change search, spec-ordered ranking), `explain.py`; a `verify.py` hard gate replays every plan through the forecast. The evidence layer calls Claude through the Claude Code CLI in headless mode with schema-constrained JSON — Haiku 4.5 for messages and explanation rewrites, Sonnet 5 for images — and `evidence/validate.py` rejects any fact whose quote isn't verbatim or whose amounts, currencies or dates don't literally appear in the source. Multi-currency (INR, ZAR, IDR, USD, EUR) via exact dated FX rates only.
+- **Evidence:** Two READMEs (a top-level project overview, and a detailed `code/README.md` with a Mermaid architecture diagram, a "how the traps are handled" table and a candid "Known limitations" section) both match the file tree. 103 test functions across 5 files, including prompt-injection cases. A committed `code/evaluation/usage_report.md` for the final run: 40 model calls, ~1.97M tokens, **$2.68 total / ~$0.011 per request**; `output.csv` reproduces from the evidence cache with zero model calls. Self-reported scores on the 25 public samples: 22–23/25 exact on status, method, plan, earliest date and spending changes; `amount_safe_to_pay` 5/25 exact with 0.66% mean error. Full run: 250 rows, every row passing the verifier. No hidden ground-truth score is published in the repo.
+- **Originality:** Original solution by the user (not a fork). The repo is built on a challenge/competition scaffold: organizer accounts `shlokashah` (31 commits) and `pawanajjark` (2) authored the problem statement, dataset and blank template between 2026-09-08 and 09-12; the user's 13 commits on 2026-09-13/14 add the entire solution — the first alone is +8,509 lines across 41 files. The challenge's required deliverables include a chat transcript of how the system was developed, and the organizer-supplied `CLAUDE.md`/`AGENTS.md` indicate AI-assisted development was expected.
+- **Honesty notes for portfolio copy:** (1) The README states that two choices were tuned to reproduce the reference outputs on the public samples — safety is checked up to the request deadline rather than across the full 90 days the spec describes, and recurring spending uses a midrange-rounded-up pricing rule found by an exact-match search (`hunt.py`). Present sample scores as sample scores, not as general accuracy. (2) Minor doc inconsistency: the top-level README's tree places `evaluation/usage_report.md` at the repo root; it actually lives at `code/evaluation/`.
+- **Portfolio value:** High, for the same reason Message-Notification-Router is valued, and more strongly. It is the clearest example in the inventory of deliberately keeping the LLM away from the numbers: models only produce cited facts, every fact is re-grounded on each run, and a verifier refuses to write any row that fails. It pairs checkable engineering discipline (invariants, plan replay, reproducible output, measured token cost) with a relatable, easy-to-explain problem. Not visual — no UI, screenshots or demo — so it suits a technical case-study treatment rather than a 3D hero.
+- **Status: Included** (user decision, round 3). **Recommended tier: Tier 2 — Featured, technical.**
 
 ### Mock-IPL-Auction ("Goated Auction")
 - **Does:** A live multiplayer cricket-auction simulator — real-time room sync, 200+ real IPL players with career stats, drag-and-drop squad building, undo, auction analytics.
@@ -210,11 +222,13 @@ Research pass over all 22 repositories on the GitHub profile, via the GitHub API
 - KiranaAI (featured) — multilingual voice/vision LLM pipeline + forecasting
 - Message-Notification-Router (featured) — deterministic multimodal decision engine
 - Astronaut_health_digital_twin (featured) — coupled-ODE physiological research model, Monte Carlo, BioGears integration
+- affordability-forecast-agent (featured, round 3) — deterministic financial-forecasting agent; LLMs extract grounded evidence only, the engine computes every number
 - Medivault (secondary) — OCR + LLM extraction
 
 **Computer Vision / Perception**
 - KiranaAI (OCR, image order ingestion) — see AI/ML
 - Message-Notification-Router (image expert / NVIDIA vision models) — see AI/ML
+- affordability-forecast-agent (vision extraction of amounts from payroll letters, bills, receipts and statements) — see AI/ML
 
 **XR / VR / Motion Capture**
 - 3D-Visualization-of-Gaussian-Splats (featured) — first-person Gaussian Splat viewer
@@ -257,6 +271,7 @@ Research pass over all 22 repositories on the GitHub profile, via the GitHub API
 - VRATA — malicious-secure MPC for cross-party statistics (rare, research-grade; paper in preparation)
 - MiniRAFT-DrawingBoard — RAFT consensus written from scratch
 - AEGIS — genuinely multi-module financial simulation architecture
+- affordability-forecast-agent — a grounding validator that rejects any model-extracted fact not literally present in its source, plus a verifier that replays every payment plan through the 90-day forecast before a row can be written; measured, committed token cost ($2.68 for 250 requests)
 
 **Projects that would visually benefit most from a 3D presentation layer**
 1. 3D-Visualization-of-Gaussian-Splats — is itself a 3D renderer; could be embedded directly as a portfolio exhibit
@@ -271,6 +286,7 @@ Research pass over all 22 repositories on the GitHub profile, via the GitHub API
 - VRATA, MiniRAFT-DrawingBoard: very small authored-commit share (1/36, 2/15) relative to team size — fine to include, but frame honestly as team projects with a specific role, not solo builds.
 - VRATA: the associated paper is written but not yet published — frame as research in preparation, not a completed publication.
 - Reality-Compiler: per its own README, the backend is stubbed and the compilation pipeline runs on a scripted front-end clock — frame as an early-build presentation prototype, not a finished product.
+- affordability-forecast-agent: the solution is the user's own, but it answers an organizer-set challenge on an organizer-supplied dataset and scaffold — say so. Its sample scores come partly from choices tuned against those same 25 samples (per its own README), and no hidden-set score is published — don't present sample accuracy as a general result.
 
 ---
 
@@ -296,6 +312,7 @@ EXPERIENCE
 
 **Tier 2 — Featured (technical depth, standard case-study treatment)**
 6. Message-Notification-Router — AI-engineering judgment showcase
+7. affordability-forecast-agent ("Buy or Wait?") — deterministic, verifier-gated financial reasoning agent; LLMs extract cited evidence only *(added in round 3 — inclusion is the user's decision; Tier 2 placement is a recommendation)*
 
 **Tier 3 — Secondary (grid/list section, lighter treatment)**
 - Mock-IPL-Auction (has a live demo — worth a link even here)
@@ -309,3 +326,5 @@ EXPERIENCE
 - AbyudShetty (profile repo), Ludo, Shell-Green-AI-Smart-Irrigation, Basic-chat-application, neetcode-submissions, claude-code, system_prompts_leaks, IMU_Reconstruction, Cloth_Cutting_Mesh_Manipulation
 
 **Open questions — all resolved.** Reality-Compiler and Astronaut_health_digital_twin now have full READMEs supplied by the user (descriptions above updated accordingly); VRATA's paper is confirmed written but not yet published, so it is presented as research-in-preparation rather than a completed publication. No open questions remain at this time.
+
+**Round 3 (2026-09-14):** `affordability-forecast-agent` added and marked for inclusion by the user. The only unconfirmed item is its tier — recommended Tier 2 above, alongside the other deterministic AI-engineering project; the user may prefer Tier 1.
