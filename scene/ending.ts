@@ -53,6 +53,12 @@ export const ENDING = {
    * the black hole leaves as it arrives.
    */
   holeFade: { start: at(360), end: at(410) },
+  /**
+   * The stars go out as the camera falls in. Nothing is behind an event
+   * horizon, so the sky is closed off well before the black hole itself
+   * fades — otherwise the dive ends looking at open space.
+   */
+  dark: { start: at(280), end: at(350) },
   /** Out of the dark, the tesseract unfolds around the camera. */
   tesseractIn: { start: at(390), end: at(480) },
   /** Scrolling on: down the corridor and into a room. */

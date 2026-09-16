@@ -499,8 +499,12 @@ export function Tesseract({ reducedMotion }: { reducedMotion: boolean }) {
     const unfold = reducedMotion
       ? 0
       : smoothstep01(windowProgress(progress, ENDING.tesseractIn));
+    // The sky closes first, while the hole is still there to fall into.
+    const dark = reducedMotion
+      ? 0
+      : smoothstep01(windowProgress(progress, ENDING.dark));
 
-    if (unfold <= 0.002) {
+    if (unfold <= 0.002 && dark <= 0.002) {
       if (g.visible) g.visible = false;
       room.current.rolled = false;
       return;
@@ -515,7 +519,7 @@ export function Tesseract({ reducedMotion }: { reducedMotion: boolean }) {
 
     // Unfolding out of the point the camera fell into.
     lattice.current.scale.setScalar(0.05 + 0.95 * (1 - Math.pow(1 - unfold, 3)));
-    parts.backdrop.opacity = 0.94 * unfold;
+    parts.backdrop.opacity = 0.97 * Math.max(dark, unfold);
     parts.vanishMaterial.uniforms.uIntensity.value = 0.22 * unfold;
 
     const carry = THREE.MathUtils.clamp(windowProgress(progress, ENDING.room), 0, 1);
