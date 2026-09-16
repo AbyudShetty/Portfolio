@@ -133,6 +133,7 @@ export const PROJECTS: ProjectRecord[] = [
     ],
     stack: ["Three.js", "WebGL", "SPZ"],
     status: [{ kind: "live", label: "LIVE DEMO" }],
+    demo: "https://parkinglot-3dgs.vercel.app/",
     year: "2026",
   },
   {
