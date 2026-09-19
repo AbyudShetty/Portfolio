@@ -93,6 +93,13 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
       if (scroll.progress >= ENDING.interactiveUntil && getFieldState().selectedId) {
         fieldActions.select(null);
       }
+      // A stone stops answering the pointer outside this window, so the
+      // pointer leaving it never registers: a hover held when the window
+      // closes would ride on into the ending (the cursor's ring, the
+      // readout). Cleared here instead.
+      if (!next && getFieldState().hoveredId) {
+        fieldActions.hover(null);
+      }
     };
     read();
     window.addEventListener("scroll", read, { passive: true });

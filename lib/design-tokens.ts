@@ -35,6 +35,7 @@ export const DOMAIN_ACCENT = {
   systems: "#6E8264", // Moss
   research: "#A88C4E", // Brass
   product: "#7A8290", // Slate
+  certification: "#E3A33B", // Marigold — certifications only
   experience: SIGNAL.base, // Signal — experience only
 } as const;
 
@@ -46,6 +47,7 @@ export const DOMAIN_LABEL = {
   xr: "XR / SPATIAL",
   systems: "SYSTEMS",
   product: "PRODUCT",
+  certification: "CERTIFICATION",
   experience: "EXPERIENCE",
 } as const;
 

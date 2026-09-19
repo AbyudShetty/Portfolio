@@ -612,7 +612,8 @@
    and keeps them. The panel's own copy is for
    assistive tech on desktop and would only duplicate the footer on mobile. */
 .specimen__link--repo,
-.specimen__link--demo {
+.specimen__link--demo,
+.specimen__link--cert {
   display: none;
 }
 

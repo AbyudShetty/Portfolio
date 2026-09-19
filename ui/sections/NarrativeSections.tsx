@@ -61,9 +61,15 @@ export function LandingSection() {
               </a>
             ))}
           </nav>
-          <p className="landing__cue" aria-hidden="true">
-            Scroll to explore
-          </p>
+        </div>
+
+        {/* The invitation to scroll, as a mark rather than words: three
+            arrow heads lighting in turn, downward. Gone with the first
+            scroll. */}
+        <div className="landing__scroll" aria-hidden="true">
+          <span className="landing__scroll-arrow" />
+          <span className="landing__scroll-arrow" />
+          <span className="landing__scroll-arrow" />
         </div>
       </div>
     </section>
@@ -150,7 +156,7 @@ export function ProjectsSection() {
       */}
       <div className="projects__heading">
         <h2 id="projects-heading" className="projects__title">
-          Projects
+          Projects &amp; Certifications
         </h2>
       </div>
 

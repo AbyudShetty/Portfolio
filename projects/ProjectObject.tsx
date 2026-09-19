@@ -4,6 +4,8 @@ import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
+import { SIGNAL } from "@/lib/design-tokens";
+
 import { Spring } from "@/lib/spring";
 import {
   fieldActions,
@@ -133,6 +135,42 @@ export function ProjectObject({
     [profile.material.bodyColor],
   );
 
+  /*
+    A tinted stone (the certifications) is the same stone in every respect
+    but one: the warm light it catches. That orange is the scene's bounce
+    light, which cannot differ per object, so the stone's own shading is
+    turned in hue instead — rotated about the grey axis by exactly the angle
+    between the signal orange and the tint. Greys, blacks and white
+    highlights have no hue and come through untouched; only the warm rim
+    changes, orange to yellow-orange.
+  */
+  const hueShift = useMemo(() => {
+    if (!record.tint) return undefined;
+    const hsl = { h: 0, s: 0, l: 0 };
+    const from = new THREE.Color(SIGNAL.base).getHSL(hsl).h;
+    const to = new THREE.Color(record.tint).getHSL(hsl).h;
+    const angle = (to - from) * Math.PI * 2;
+    return (shader: THREE.WebGLProgramParametersWithUniforms) => {
+      shader.uniforms.uHueShift = { value: angle };
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "void main() {",
+          `uniform float uHueShift;
+vec3 rotateHue(vec3 c, float a) {
+  const vec3 k = vec3(0.57735);
+  float ca = cos(a);
+  return c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca);
+}
+void main() {`,
+        )
+        .replace(
+          "#include <opaque_fragment>",
+          `#include <opaque_fragment>
+  gl_FragColor.rgb = max(rotateHue(gl_FragColor.rgb, uHueShift), 0.0);`,
+        );
+    };
+  }, [record.tint]);
+
   const isHovered = useFieldSelector((s) => s.hoveredId === record.id);
   const isFocused = useFieldSelector((s) => s.focusedId === record.id);
   const isSelected = useFieldSelector((s) => s.selectedId === record.id);
@@ -142,6 +180,21 @@ export function ProjectObject({
   const specimenOpen = useFieldSelector((s) => s.selectedId !== null);
   const [proximate, setProximate] = useState(false);
   const publishedPresence = useRef(-1);
+  // Set once this stone has left the frame on its way into the black hole:
+  // only then does it give up its glass (see optical, below).
+  const solidInEnding = useRef(false);
+  /*
+    This stone's own dice for the ending, rolled once per page load. The
+    field is in rows of five, so ordering the fall by position alone sends
+    each column of three into the black hole together. A small jitter on its
+    turn to leave, and a random delay before the hole catches it, break that
+    into a real mix — a stone alone, then two together, then three — different
+    on every visit. Bounded so the last stone is still gone by 82.8%.
+  */
+  const [fallDice] = useState(() => ({
+    exit: (Math.random() - 0.5) * 0.24,
+    catch: 0.35 + Math.random() * 0.65,
+  }));
   const [labelled, setLabelled] = useState(reducedMotion);
   // True once the ending has begun: labels go out before the stones leave.
   const [ending, setEnding] = useState(false);
@@ -324,16 +377,17 @@ export function ProjectObject({
     // target is a hard zero, not a small number: three.js decides whether to
     // run the whole extra scene pass on `transmission > 0`, so 0.001 costs
     // exactly as much as 0.66.
-    // ...and taken away again for the ending: a stone falling into the black
+    // ...and taken away again for the ending — a stone falling into the black
     // hole is too small to show refraction, and glass there would re-render
-    // the whole scene — black hole and Endurance included — a second time.
+    // the whole scene, black hole and Endurance included, a second time. But
+    // only once the stone is out of frame (step 5): changing its material in
+    // view reads as the stone changing colour.
     const optical = reducedMotion
       ? 1
       : smoothstep01(
           (progress - FIELD_OPTICS.start) /
             (FIELD_OPTICS.end - FIELD_OPTICS.start),
-        ) *
-        (1 - smoothstep01(windowProgress(progress, ENDING.labelsOut)));
+        ) * (solidInEnding.current ? 0 : 1);
     springs.transmission.target = isSelected
       ? SELECTED_TRANSMISSION
       : optical * profile.material.transmission;
@@ -457,10 +511,13 @@ export function ProjectObject({
 
     // ── 5. The ending. The stones leave to the left, leftmost first, then
     // spiral into the black hole in the same order (scene/ending.ts).
+    if (progress <= ENDING.pebbles.start && solidInEnding.current) {
+      solidInEnding.current = false;
+    }
     if (!reducedMotion && progress > ENDING.pebbles.start) {
       const timing = ENDING.pebbles;
       const order = THREE.MathUtils.clamp(
-        (coordinate.gathered[0] - FIELD_X_MIN) / FIELD_X_SPAN,
+        (coordinate.gathered[0] - FIELD_X_MIN) / FIELD_X_SPAN + fallDice.exit,
         0,
         1,
       );
@@ -476,7 +533,8 @@ export function ProjectObject({
       _exit.y -= pull * 2;
       _exit.z -= pull * 8;
 
-      const fallT = (progress - start - timing.catch) / timing.fall;
+      const fallT =
+        (progress - start - timing.catch * fallDice.catch) / timing.fall;
 
       let size = 1;
       if (fallT > 0) {
@@ -484,6 +542,15 @@ export function ProjectObject({
       } else {
         g.position.copy(_exit);
       }
+
+      // The glass comes off only while the stone is out of frame — on the way
+      // out once it is well into its exit, and back on the way home (scrolling
+      // up) before it re-enters. Unchanged while on screen, so no stone ever
+      // changes colour in view.
+      _screen.copy(g.position).project(camera);
+      const offscreen =
+        _screen.z > 1 || Math.abs(_screen.x) > 1.25 || Math.abs(_screen.y) > 1.25;
+      if (offscreen) solidInEnding.current = leave >= 1;
       if (size <= 0.002) {
         if (g.visible) g.visible = false;
         return;
@@ -581,6 +648,7 @@ export function ProjectObject({
           clearcoatRoughness={profile.material.clearcoatRoughness}
           envMapIntensity={profile.material.envMapIntensity}
           emissive={profile.material.bodyColor}
+          onBeforeCompile={hueShift}
           emissiveIntensity={0}
           transparent={false}
         />

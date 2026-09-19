@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { scroll } from "@/hooks/useScrollProgress";
 import { smoothstep01 } from "@/scene/reveal";
 import { ENDING, HOLE, HOLE_U, HOLE_V, windowProgress } from "@/scene/ending";
+import { useWarmUp } from "@/scene/warmup";
 
 /**
  * BlackHole — Gargantua, traced per pixel.
@@ -187,6 +188,8 @@ const fragmentShader = /* glsl */ `
 export function BlackHole({ reducedMotion }: { reducedMotion: boolean }) {
   const mesh = useRef<THREE.Mesh>(null);
   const camera = useThree((state) => state.camera);
+  // The ray-tracing shader compiled during the landing, not at the reveal.
+  useWarmUp(mesh, 1100);
 
   const material = useMemo(() => {
     // Rows u, n, v: world direction → disc-local (x, y = up the normal, z).

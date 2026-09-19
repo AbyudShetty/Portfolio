@@ -41,13 +41,13 @@ export const ENDING = {
     leave: span(110),
     /** How long after it starts leaving the fall takes hold. */
     catch: span(70),
-    /** From the fall taking hold to gone. Last stone is gone by 1290vh. */
-    fall: span(160),
+    /** From the fall taking hold to gone. Last stone is gone by 1325vh. */
+    fall: span(195),
   },
   /** The black hole fades up as the camera turns toward it. */
   holeIn: { start: at(80), end: at(170) },
   /** The Endurance, with the astronaut tethered behind it, falls last. */
-  craftFall: { start: at(210), end: at(330) },
+  craftFall: { start: at(210), end: at(365) },
   /**
    * Everything has gone and the camera has dived into the shadow (1345vh);
    * the black hole leaves as it arrives.
@@ -61,6 +61,12 @@ export const ENDING = {
   dark: { start: at(280), end: at(350) },
   /** Out of the dark, the tesseract unfolds around the camera. */
   tesseractIn: { start: at(390), end: at(480) },
+  /**
+   * The astronaut rises into the tesseract from below the bottom-centre of
+   * the frame (from 86%) to its place ahead of the camera, arriving as the
+   * carry into the room begins.
+   */
+  guide: { start: at(416), end: at(490) },
   /** Scrolling on: down the corridor and into a room. */
   room: { start: at(490), end: at(630) },
   /** The room's light rises to fill the frame by the bottom of the page. */
@@ -68,6 +74,27 @@ export const ENDING = {
 } as const;
 
 /* ── The tesseract ──────────────────────────────────────────────────────── */
+
+/**
+ * The astronaut inside the tesseract, as in the film: a small figure drifting
+ * ahead of the camera down the corridor, who reaches the chosen room first
+ * and goes in, the camera following. Written each frame by the Tesseract
+ * (which knows where the room is) and read by ExperienceComposition (which
+ * owns the figure). World space.
+ */
+export const tesseractGuide = {
+  active: false,
+  position: new THREE.Vector3(),
+  quaternion: new THREE.Quaternion(),
+  /** Relative to the figure's Experience scale: a small person among rooms. */
+  scale: 0.18,
+  presence: 0,
+  /**
+   * 0 → 1 over the final close-up: how far the figure is lowered so its
+   * helmet, not its middle, sits on the camera's line of sight.
+   */
+  faceLift: 0,
+};
 
 /** Where the dive into the black hole ends: ~3.75 horizon radii out. */
 export const DIVE_CAMERA = new THREE.Vector3(-76.5, 5.9, -56.8);

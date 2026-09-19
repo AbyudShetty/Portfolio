@@ -1,8 +1,10 @@
 "use client";
 
 import { useGLTF } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+
+import { useWarmUp } from "@/scene/warmup";
 
 /**
  * Astronaut — the real model, replacing the procedural figure.
@@ -23,6 +25,12 @@ import * as THREE from "three";
 
 export const ASTRONAUT_URL = "/models/astronaut.glb";
 
+/**
+ * The figure's resting pose inside its group: turned away and tipped. The
+ * model faces +Z (its pack, and the tether socket on it, is at -Z).
+ */
+export const ASTRONAUT_POSE: [number, number, number] = [0.2, -0.5, 0.14];
+
 /** The model's own height, measured in scene space. */
 const MODEL_HEIGHT = 1.907;
 
@@ -34,6 +42,9 @@ const MODEL_HEIGHT = 1.907;
 const FIGURE_HEIGHT = 2.25;
 const FEET_Y = -0.91;
 const MODEL_SCALE = FIGURE_HEIGHT / MODEL_HEIGHT;
+
+/** The middle of the helmet, above the figure's origin (unscaled). */
+export const ASTRONAUT_HEAD_Y = FEET_Y + 0.88 * FIGURE_HEIGHT;
 
 /**
  * The tether socket, on the back.
@@ -62,6 +73,9 @@ export function Astronaut({
   // The loader cache hands back one shared scene; clone so this component
   // never mutates it.
   const model = useMemo(() => scene.clone(true), [scene]);
+  // Ready before the Experience: compiled and uploaded during the landing.
+  const figure = useRef<THREE.Group>(null);
+  useWarmUp(figure, 600);
 
   useEffect(() => {
     model.traverse((child) => {
@@ -84,7 +98,7 @@ export function Astronaut({
   return (
     // Posed once: turned away and tipped, the way a body drifts when nothing
     // is holding it. The same pose the procedural figure held.
-    <group rotation={[0.2, -0.5, 0.14]}>
+    <group ref={figure} rotation={ASTRONAUT_POSE}>
       <primitive object={model} scale={MODEL_SCALE} position={[0, FEET_Y, 0]} />
 
       {/*

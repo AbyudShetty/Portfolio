@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { ENVIRONMENT } from "@/lib/design-tokens";
 import { createFader } from "./fade";
+import { useWarmUp } from "@/scene/warmup";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { scroll } from "@/hooks/useScrollProgress";
 import { progressAt } from "@/scene/cameraChoreography";
@@ -175,6 +176,10 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
   ]);
   const settled = useRef(false);
   const fadeCraft = useMemo(() => createFader(), []);
+  // Shaders compiled and the model uploaded while the landing is on screen,
+  // so the first frame the craft appears in costs nothing extra.
+  const root = useRef<THREE.Group>(null);
+  useWarmUp(root, 350);
 
   useFrame((_, delta) => {
     const group = carrier.current;
@@ -384,7 +389,7 @@ function SequenceBody({ reducedMotion }: { reducedMotion: boolean }) {
   });
 
   return (
-    <group>
+    <group ref={root}>
       <group ref={carrier} visible={false}>
         <Endurance anchorRef={rangerAnchor} paused={reducedMotion} />
       </group>

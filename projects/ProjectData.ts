@@ -19,6 +19,7 @@ export type Domain =
   | "xr"
   | "systems"
   | "product"
+  | "certification"
   | "experience";
 
 /** Rank drives depth, scale, clarity and motion mass. DESIGN.md §7.1, §4.2, §6.1. */
@@ -37,7 +38,8 @@ export type StatusKind =
   | "prototype"
   | "research"
   | "team"
-  | "coursework";
+  | "coursework"
+  | "certificate";
 
 export interface Status {
   kind: StatusKind;
@@ -56,8 +58,8 @@ export interface ProjectRecord {
    * view show.
    */
   shortName?: string;
-  /** GitHub repository name, for later milestones. */
-  repo: string;
+  /** GitHub repository name. Absent for certifications. */
+  repo?: string;
   domain: Domain;
   tier: Tier;
   /** Employer or lab, where the work was done for one. */
@@ -82,6 +84,15 @@ export interface ProjectRecord {
   narrative?: string[];
   /** A deployed instance, where one exists and its URL is known. */
   demo?: string;
+  /** The certificate itself, for a certification stone. */
+  certificate?: string;
+  /**
+   * The colour of the warm light the stone catches. Every stone is the same
+   * graphite glass lit by the scene's orange bounce; a stone with a tint
+   * catches that light in this hue instead — the certifications, in a
+   * yellow-orange. Its engraved accents and field label follow.
+   */
+  tint?: string;
   stack: string[];
   status: Status[];
   year: string;
@@ -365,6 +376,53 @@ export const PROJECTS: ProjectRecord[] = [
     status: [{ kind: "coursework", label: "ACADEMIC PROJECT" }],
     year: "2025",
   },
+
+  // ── CERTIFICATIONS ────────────────────────────────────────────────────────
+  // Stones of their own, to the right of the projects, in a warm tint. Course
+  // details from the certificates and NPTEL's published syllabi.
+  {
+    id: "dlcert",
+    name: "Deep Learning",
+    domain: "certification",
+    tier: "featured-2",
+    org: "NPTEL · IIT Ropar",
+    summary:
+      "NPTEL certification, Elite: a 12-week IIT Ropar course by Prof. Sudarshan Iyengar and Prof. Mitesh Khapra (IIT Madras), Jul–Oct 2025.",
+    points: [
+      "A 12-week NPTEL course from IIT Ropar, taught by Prof. Sudarshan Iyengar and Prof. Mitesh Khapra — completed with an Elite certificate.",
+      "From a single perceptron up: feedforward networks, backpropagation, and the optimisers that train them — momentum, Nesterov, AdaGrad, RMSProp, Adam.",
+      "What keeps deep networks learning well: autoencoders, regularisation and dropout, better initialisation and batch normalisation.",
+      "The architectures behind vision and language: CNNs from LeNet to ResNet, RNNs, LSTMs and GRUs, encoder–decoders and attention.",
+    ],
+    certificate:
+      "https://drive.google.com/file/d/19EUQoyp5-8SgQ_4tzsvh_pBF7fGvFWpR/view?usp=sharing",
+    tint: "#E3A33B",
+    stack: ["NPTEL", "IIT Ropar", "Elite", "Jul–Oct 2025"],
+    status: [{ kind: "certificate", label: "NPTEL · ELITE" }],
+    year: "2025",
+  },
+  {
+    id: "llmcert",
+    name: "Introduction to Large Language Models",
+    shortName: "Intro to LLMs",
+    domain: "certification",
+    tier: "featured-2",
+    org: "NPTEL · IIT Delhi & IIT Bombay",
+    summary:
+      "NPTEL certification: a 12-week course by Prof. Tanmoy Chakraborty (IIT Delhi) and Prof. Soumen Chakrabarti (IIT Bombay), Jul–Oct 2025.",
+    points: [
+      "A 12-week NPTEL course by Prof. Tanmoy Chakraborty (IIT Delhi) and Prof. Soumen Chakrabarti (IIT Bombay).",
+      "How language models got here: n-gram models, word vectors like Word2Vec and GloVe, and sequence-to-sequence models with attention.",
+      "The Transformer in depth — self-attention, positional embeddings, tokenisation — and the families built on it: BERT, GPT and T5.",
+      "Making them useful: prompting and chain-of-thought, instruction tuning, alignment with human feedback (RLHF) and efficient fine-tuning with LoRA.",
+    ],
+    certificate:
+      "https://drive.google.com/file/d/1-38n9DKv9I1ZTkRb0JyHjq2DPTB4w3JK/view?usp=sharing",
+    tint: "#E3A33B",
+    stack: ["NPTEL", "IIT Delhi", "IIT Bombay", "Jul–Oct 2025"],
+    status: [{ kind: "certificate", label: "NPTEL · CERTIFIED" }],
+    year: "2025",
+  },
 ];
 
 export const EXPERIENCE_ID = "slimevr";
@@ -380,8 +438,8 @@ export const EXPERIENCE_RECORD = PROJECTS.find(
 /** Every repository in this inventory lives under this account. */
 export const GITHUB_USER = "AbyudShetty";
 
-export function repoUrl(record: ProjectRecord): string {
-  return `https://github.com/${GITHUB_USER}/${record.repo}`;
+export function repoUrl(record: ProjectRecord): string | null {
+  return record.repo ? `https://github.com/${GITHUB_USER}/${record.repo}` : null;
 }
 
 export function getProject(id: string): ProjectRecord | undefined {

@@ -159,14 +159,26 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
           {/* On desktop the link is engraved on the stone; this is the same
               link for screen readers and the keyboard. Hidden on mobile,
               where the visible footer below carries it. */}
-          <a
-            className="specimen__repo"
-            href={repoUrl(record)}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            GitHub repository
-          </a>
+          {repoUrl(record) ? (
+            <a
+              className="specimen__repo"
+              href={repoUrl(record)!}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              GitHub repository
+            </a>
+          ) : null}
+          {record.certificate ? (
+            <a
+              className="specimen__repo"
+              href={record.certificate}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              View certificate
+            </a>
+          ) : null}
           {record.demo ? (
             <a
               className="specimen__repo"
@@ -208,15 +220,28 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
           the controls must never be on screen before the thing they act on. */}
       <div className="specimen__footer">
         <div className="specimen__actions">
-          <a
-            className="specimen__link specimen__link--repo"
-            href={repoUrl(record)}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            View on GitHub
-            <span aria-hidden="true">↗</span>
-          </a>
+          {repoUrl(record) ? (
+            <a
+              className="specimen__link specimen__link--repo"
+              href={repoUrl(record)!}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              View on GitHub
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
+          {record.certificate ? (
+            <a
+              className="specimen__link specimen__link--cert"
+              href={record.certificate}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              View certificate
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
           {record.demo ? (
             <a
               className="specimen__link specimen__link--demo"

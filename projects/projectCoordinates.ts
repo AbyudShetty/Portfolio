@@ -42,8 +42,11 @@ export interface Coordinate {
 export const FIELD_CENTER: [number, number, number] = [0, 0, -25.6];
 
 /**
- * Row structure of the puddle, top-down: 4 / 4 / 5 with irregular spacing.
- * Listed here in settling order so the layout is legible in source.
+ * Row structure of the puddle, top-down: 5 / 5 / 5 — the thirteen projects
+ * and the two certifications as one bunch, the certifications at the right
+ * end of the front and middle rows. Centred on FIELD_CENTER (centroid within
+ * 0.01), every stone at least 2.9 units from its neighbours, unevenly set so
+ * it never reads as a grid. (Portrait screens use their own rows, below.)
  *
  * Recomposed for thirteen stones. The twelfth-stone layout had no room for a
  * thirteenth that did not read as a row of its own, so every gathered
@@ -67,25 +70,25 @@ export const COORDINATES: Record<string, Coordinate> = {
   splats: {
     code: "XR-01",
     scattered: [-16.5, 4.2, -30],
-    gathered: [-4.27, 0.42, -22.88],
+    gathered: [-5.9, 0.42, -22.9],
     portrait: [-3.6, 0.35, -19.8],
   },
   cardiotriage: {
     code: "SIM-02",
     scattered: [7.5, 5.6, -21],
-    gathered: [-1.5, 0.55, -21.79],
+    gathered: [-2.95, 0.55, -22.3],
     portrait: [0.1, 0.5, -20.1],
   },
   aegis: {
     code: "SYS-01",
     scattered: [18.5, 2.4, -33],
-    gathered: [1.48, 0.38, -21.88],
+    gathered: [0.05, 0.38, -22.6],
     portrait: [3.6, 0.3, -19.7],
   },
   affordability: {
     code: "AI-04",
     scattered: [-2.5, 8.8, -37],
-    gathered: [4.22, 0.1, -23.03],
+    gathered: [3.0, 0.1, -22.4],
     portrait: [-1.8, 0.15, -23.2],
   },
 
@@ -93,25 +96,25 @@ export const COORDINATES: Record<string, Coordinate> = {
   kirana: {
     code: "AI-01",
     scattered: [-20, -3.5, -25],
-    gathered: [-5.97, 0.18, -25.33],
+    gathered: [-6.35, 0.18, -25.8],
     portrait: [1.9, 0.2, -23.4],
   },
   astronaut: {
     code: "SIM-01",
     scattered: [-9, 6.5, -44],
-    gathered: [-1.99, 0.62, -24.99],
+    gathered: [-3.2, 0.62, -25.4],
     portrait: [-3.7, 0.5, -26.5],
   },
   msgrouter: {
     code: "AI-02",
     scattered: [12, -5.2, -38],
-    gathered: [1.66, 0.3, -24.94],
+    gathered: [-0.05, 0.3, -25.7],
     portrait: [0, 0.3, -26.8],
   },
   miniraft: {
     code: "SYS-02",
     scattered: [22, 5.5, -27],
-    gathered: [4.6, 0.22, -25.98],
+    gathered: [3.1, 0.22, -25.4],
     portrait: [3.6, 0.2, -26.4],
   },
 
@@ -119,32 +122,48 @@ export const COORDINATES: Record<string, Coordinate> = {
   vrata: {
     code: "RES-01",
     scattered: [-24, 1.8, -47],
-    gathered: [-6.77, -0.15, -28.19],
+    gathered: [-6.1, -0.15, -28.8],
     portrait: [-1.9, -0.1, -30.1],
   },
   medivault: {
     code: "AI-03",
     scattered: [-13, -6.2, -34],
-    gathered: [-3.69, 0.1, -28.11],
+    gathered: [-3.05, 0.1, -28.5],
     portrait: [1.8, 0.1, -29.9],
   },
   ipl: {
     code: "PRD-01",
     scattered: [4, -7.5, -50],
-    gathered: [-0.72, -0.05, -27.78],
+    gathered: [0, -0.05, -28.9],
     portrait: [-3.6, 0, -33.2],
   },
   realitycompiler: {
     code: "PRD-02",
     scattered: [16, 7.2, -46],
-    gathered: [2.51, 0.15, -28.09],
+    gathered: [3.05, 0.15, -28.6],
     portrait: [0, 0.15, -33.5],
   },
   hcrm: {
     code: "PRD-03",
     scattered: [25, -2.6, -40],
-    gathered: [7.09, -0.2, -27.62],
+    gathered: [6.15, -0.2, -28.8],
     portrait: [3.7, -0.15, -33.1],
+  },
+
+  // ── Certifications (2), to the right of the projects ────────────────────
+  // In the bunch at the right of the front and middle rows (landscape);
+  // a sixth row under the five on portrait screens.
+  dlcert: {
+    code: "CRT-01",
+    scattered: [27, 3.5, -36],
+    gathered: [6.3, 0.25, -25.9],
+    portrait: [-1.8, 0.25, -36.7],
+  },
+  llmcert: {
+    code: "CRT-02",
+    scattered: [24, -4.5, -45],
+    gathered: [5.95, 0.3, -22.9],
+    portrait: [1.9, 0.2, -36.9],
   },
 };
 
@@ -178,4 +197,5 @@ export const DOMAIN_ORDER: Domain[] = [
   "xr",
   "systems",
   "product",
+  "certification",
 ];

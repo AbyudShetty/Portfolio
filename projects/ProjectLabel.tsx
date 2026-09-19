@@ -48,6 +48,7 @@ export function ProjectLabel({
       <div
         className="pebble-label"
         data-state={state}
+        data-domain={domain}
         style={{
           transition: reducedMotion
             ? "none"

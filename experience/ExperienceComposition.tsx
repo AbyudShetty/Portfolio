@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 import { scroll } from "@/hooks/useScrollProgress";
 import { easeOutCubic, smoothstep01 } from "@/scene/reveal";
-import { Astronaut } from "./Astronaut";
+import { Astronaut, ASTRONAUT_HEAD_Y, ASTRONAUT_POSE } from "./Astronaut";
 import {
   anchors,
   ASTRONAUT_DRIFT,
@@ -23,6 +23,7 @@ import {
   ASTRONAUT_ENTRY,
   ENDING,
   fallInto,
+  tesseractGuide,
   windowProgress as endingWindow,
 } from "@/scene/ending";
 
@@ -78,6 +79,11 @@ const EXIT_POSITION = new THREE.Vector3(-2.0, 0.4, -8.5);
 const FOLLOW = 7;
 
 const _target = new THREE.Vector3();
+/** Undoes the resting pose, so the tesseract's heading is the figure's. */
+const _up = new THREE.Vector3();
+const POSE_INVERSE = new THREE.Quaternion()
+  .setFromEuler(new THREE.Euler(...ASTRONAUT_POSE))
+  .invert();
 
 export function ExperienceComposition({
   reducedMotion,
@@ -130,7 +136,7 @@ export function ExperienceComposition({
     faded.current = value;
   };
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const g = group.current;
     if (!g) return;
 
@@ -141,6 +147,31 @@ export function ExperienceComposition({
     const exit = reducedMotion
       ? 0
       : smoothstep01(windowProgress(progress, ASTRONAUT_EXIT));
+
+    // Inside the tesseract: the figure again, small among the rooms, drifting
+    // down the corridor ahead of the camera and into the room it opens onto
+    // (Tesseract.tsx steers it). No ship here, so no cable.
+    if (!reducedMotion && tesseractGuide.active) {
+      if (!g.visible) g.visible = true;
+      g.position.copy(tesseractGuide.position);
+      g.quaternion.copy(tesseractGuide.quaternion).multiply(POSE_INVERSE);
+      g.scale.setScalar(ASTRONAUT_SCALE * tesseractGuide.scale);
+      // For the last close-up the helmet goes on the line of sight: the
+      // figure is lowered by its head height, along its own up.
+      if (tesseractGuide.faceLift > 0) {
+        _up.set(0, 1, 0).applyQuaternion(tesseractGuide.quaternion);
+        g.position.addScaledVector(
+          _up,
+          -ASTRONAUT_HEAD_Y * g.scale.x * tesseractGuide.faceLift,
+        );
+      }
+      applyFade(g, tesseractGuide.presence);
+      settled.current = false;
+      anchors.astronautReady = false;
+      return;
+    }
+    // Everywhere else the figure's pose lives on its inner group.
+    g.quaternion.identity();
 
     // The ending: back on the tether, a beat behind the Endurance, and into
     // the black hole after it.
@@ -198,6 +229,14 @@ export function ExperienceComposition({
     );
     _target.lerp(EXIT_POSITION, exit);
 
+    // Floating, the same as in the tesseract: a slow bob and a little sway,
+    // on clock time so it keeps breathing while the page is still.
+    const t = state.clock.elapsedTime;
+    if (!reducedMotion) {
+      _target.y += Math.sin(t * 0.6) * 0.1;
+      _target.x += Math.sin(t * 0.37) * 0.05;
+    }
+
     if (!settled.current || reducedMotion) {
       g.position.copy(_target);
       settled.current = true;
@@ -206,6 +245,15 @@ export function ExperienceComposition({
     }
 
     g.scale.setScalar(ASTRONAUT_SCALE * (0.7 + enter * 0.3));
+    // ...and the same slow drift in pitch, yaw and roll. The tether socket is
+    // on the figure, so the cable follows it.
+    if (!reducedMotion) {
+      g.rotation.set(
+        Math.sin(t * 0.4) * 0.04,
+        Math.sin(t * 0.25) * 0.05,
+        Math.sin(t * 0.3) * 0.08,
+      );
+    }
 
     // Publish the pack socket's live world position for the tether. Queried
     // from the scene graph each frame, so the cable stays attached through

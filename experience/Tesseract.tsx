@@ -6,7 +6,14 @@ import * as THREE from "three";
 
 import { scroll } from "@/hooks/useScrollProgress";
 import { smoothstep01 } from "@/scene/reveal";
-import { ENDING, HOLE, TESSERACT_CAMERA, windowProgress } from "@/scene/ending";
+import {
+  ENDING,
+  HOLE,
+  TESSERACT_CAMERA,
+  tesseractGuide,
+  windowProgress,
+} from "@/scene/ending";
+import { useWarmUp } from "@/scene/warmup";
 
 /**
  * Tesseract — what is inside the black hole.
@@ -310,6 +317,9 @@ function additive(
   vertexShader: string,
   fragmentShader: string,
   uniforms: Record<string, THREE.IUniform>,
+  // Tested against depth by default, so the astronaut passing through the
+  // lattice hides the strands behind it. The two glows opt out.
+  depthTest = true,
 ) {
   return new THREE.ShaderMaterial({
     vertexShader,
@@ -317,7 +327,7 @@ function additive(
     uniforms,
     transparent: true,
     depthWrite: false,
-    depthTest: false,
+    depthTest,
     blending: THREE.AdditiveBlending,
   });
 }
@@ -328,6 +338,24 @@ const ROOM_CHOICES: [number, number][] = [
 ];
 
 const _camLocal = new THREE.Vector3();
+const _roomLocal = new THREE.Vector3();
+const _guideStart = new THREE.Vector3();
+const _guideRise = new THREE.Vector3();
+const _guideLocal = new THREE.Vector3();
+const _guideAhead = new THREE.Vector3();
+const _heading = new THREE.Vector3();
+const _faceSpot = new THREE.Vector3();
+/**
+ * The astronaut's turn to face the camera, as fractions of the carry into the
+ * room (ENDING.room, 1450–1590vh): it begins at 0.237 (1483vh, 92.7% of the
+ * page) and is complete — facing the lens — at 0.729 (1552vh, 97%). The
+ * close-up on the face follows from there to the end.
+ */
+const TURN_FROM = 0.237;
+const TURN_TO = 0.729;
+const _forward = new THREE.Vector3(0, 0, -1);
+const _tumble = new THREE.Euler(0, 0, 0, "YXZ");
+const _tumbleQ = new THREE.Quaternion();
 const _roomTarget = new THREE.Vector3();
 
 function easeInOut(t: number): number {
@@ -347,6 +375,11 @@ export function Tesseract({ reducedMotion }: { reducedMotion: boolean }) {
 
   const camera = useThree((s) => s.camera);
   const gl = useThree((s) => s.gl);
+  // Lattice shaders compiled and instances uploaded during the landing.
+  useWarmUp(root, 1500);
+
+  /** The astronaut's heading, damped so its turns are smooth (root-local). */
+  const guideDir = useRef(new THREE.Vector3(0, 0, -1));
 
   /** Which room this visit ends in, chosen afresh every time the tesseract opens. */
   const room = useRef({ x: 0, y: 0, z: 0, rolled: false });
@@ -430,18 +463,28 @@ export function Tesseract({ reducedMotion }: { reducedMotion: boolean }) {
     dust.frustumCulled = false;
     dust.renderOrder = 4;
 
-    const vanishMaterial = additive(plainVertex, glowFragment, {
-      uIntensity: { value: 0 },
-      uFalloff: { value: 5 },
-      uWarm: shared.uWarm,
-      uPale: shared.uPale,
-    });
-    const screenMaterial = additive(plainVertex, glowFragment, {
-      uIntensity: { value: 0 },
-      uFalloff: { value: 1.2 },
-      uWarm: shared.uWarm,
-      uPale: shared.uPale,
-    });
+    const vanishMaterial = additive(
+      plainVertex,
+      glowFragment,
+      {
+        uIntensity: { value: 0 },
+        uFalloff: { value: 5 },
+        uWarm: shared.uWarm,
+        uPale: shared.uPale,
+      },
+      false,
+    );
+    const screenMaterial = additive(
+      plainVertex,
+      glowFragment,
+      {
+        uIntensity: { value: 0 },
+        uFalloff: { value: 1.2 },
+        uWarm: shared.uWarm,
+        uPale: shared.uPale,
+      },
+      false,
+    );
     screenMaterial.toneMapped = false;
 
     const backdrop = new THREE.MeshBasicMaterial({
@@ -507,6 +550,7 @@ export function Tesseract({ reducedMotion }: { reducedMotion: boolean }) {
     if (unfold <= 0.002 && dark <= 0.002) {
       if (g.visible) g.visible = false;
       room.current.rolled = false;
+      tesseractGuide.active = false;
       return;
     }
     if (!g.visible) g.visible = true;
@@ -556,6 +600,115 @@ export function Tesseract({ reducedMotion }: { reducedMotion: boolean }) {
     screenGlow.current.position.set(_camLocal.x, _camLocal.y, _camLocal.z - 0.6);
     parts.screenMaterial.uniforms.uIntensity.value = Math.pow(light, 3) * 1.8;
     screenGlow.current.visible = light > 0.001;
+
+    // ── The astronaut's way through. It comes in from just below and in
+    // front of the lens, moving forward — away from the camera, into the
+    // tesseract — and so enters the frame from the bottom, travelling. It
+    // settles a few metres ahead, facing down the corridor, then leads the
+    // carry toward the chosen room, its heading following its own path. Near
+    // the room it turns back to the camera, which closes in on its face; the
+    // room's light then takes the frame.
+    const entry = reducedMotion
+      ? 0
+      : THREE.MathUtils.clamp(windowProgress(progress, ENDING.guide), 0, 1);
+    tesseractGuide.active = entry > 0.001;
+    if (tesseractGuide.active) {
+      const t = shared.uTime.value;
+      const scale = lattice.current.scale.x;
+      const r = room.current;
+
+      _guideStart.set(_camLocal.x, _camLocal.y - 0.55, _camLocal.z - 5.5);
+      _guideRise.set(_camLocal.x, _camLocal.y - 1.05, _camLocal.z - 1.1);
+
+      // Where the figure is at carry `c`: from its place ahead toward the
+      // room, whose own position at `c` follows the lattice's travel.
+      const pathAt = (c: number, out: THREE.Vector3) => {
+        const across = easeInOut((c - 0.3) / 0.7);
+        const along = easeInOut(c / 0.95);
+        _roomLocal
+          .set(r.x * (1 - across), r.y * (1 - across), (r.z + phase.current) * (1 - along))
+          .multiplyScalar(scale);
+        return out.lerpVectors(_guideStart, _roomLocal, easeInOut(c / 0.8));
+      };
+
+      let steer = 0;
+      if (carry <= 0) {
+        // Rising into place.
+        const up = 1 - Math.pow(1 - entry, 3);
+        _guideLocal.lerpVectors(_guideRise, _guideStart, up);
+        _heading.subVectors(_guideStart, _guideRise).normalize();
+        steer = 0.25 * (1 - up);
+      } else {
+        pathAt(carry, _guideLocal);
+        pathAt(Math.min(1, carry + 0.02), _guideAhead);
+        _heading.subVectors(_guideAhead, _guideLocal);
+        const run = _heading.length();
+        if (run > 1e-5) _heading.divideScalar(run);
+        steer = run > 1e-5 ? smoothstep01(carry / 0.12) : 0;
+      }
+      // Straight ahead, turned toward the path as the path turns.
+      _heading.lerp(_forward, 1 - steer).normalize();
+
+      // The room slides toward the camera through the carry, and once it
+      // passes the figure the path itself points back at the lens. The path
+      // is never allowed to turn the figure around on its own: facing back is
+      // a deliberate, slow turn of its own, below.
+      if (_heading.z > 0) {
+        _heading.z = 0;
+        if (_heading.lengthSq() < 1e-6) _heading.copy(_forward);
+        else _heading.normalize();
+      }
+
+      // The turn: from 92.7% to 97% the figure slowly turns round to face
+      // the camera, toward the side its room is on. Then the close-up: the
+      // camera closes in until the helmet fills the frame.
+      const turn = smoothstep01((carry - TURN_FROM) / (TURN_TO - TURN_FROM));
+      const face = smoothstep01((carry - TURN_TO) / (1 - TURN_TO));
+      if (face > 0) {
+        const dist = THREE.MathUtils.lerp(2.6, 0.34, easeInOut(face));
+        _faceSpot.set(_camLocal.x, _camLocal.y, _camLocal.z - dist);
+        _guideLocal.lerp(_faceSpot, smoothstep01(face * 1.5));
+      }
+      if (turn > 0) {
+        const pathYaw = Math.atan2(_heading.x, _heading.z);
+        const pathPitch = -Math.asin(THREE.MathUtils.clamp(_heading.y, -1, 1));
+        // To face the camera is yaw 0 (+Z, toward it); turn the short way,
+        // or toward the room's side when the two ways are equal.
+        let delta = -pathYaw;
+        delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+        if (Math.abs(Math.abs(delta) - Math.PI) < 0.35) {
+          delta = (r.x < 0 ? -1 : 1) * Math.abs(delta);
+        }
+        const yaw = pathYaw + delta * turn;
+        const pitch = pathPitch * (1 - turn);
+        _heading.set(
+          Math.cos(pitch) * Math.sin(yaw),
+          -Math.sin(pitch),
+          Math.cos(pitch) * Math.cos(yaw),
+        );
+      }
+      tesseractGuide.faceLift = face;
+      guideDir.current.lerp(_heading, 1 - Math.exp(-4 * dt)).normalize();
+
+      _guideLocal.y += Math.sin(t * 0.6) * 0.05;
+      tesseractGuide.position.copy(_guideLocal).applyMatrix4(g.matrixWorld);
+
+      // Face the heading: the model's front (+Z) turned onto it, with a
+      // slow float in pitch and roll.
+      const d = guideDir.current;
+      _tumble.set(
+        -Math.asin(THREE.MathUtils.clamp(d.y, -1, 1)) + Math.sin(t * 0.4) * 0.04,
+        Math.atan2(d.x, d.z),
+        Math.sin(t * 0.3) * 0.08,
+        "YXZ",
+      );
+      tesseractGuide.quaternion
+        .copy(g.quaternion)
+        .multiply(_tumbleQ.setFromEuler(_tumble));
+      tesseractGuide.presence = smoothstep01(entry * 3);
+    } else {
+      guideDir.current.copy(_forward);
+    }
   });
 
   return (

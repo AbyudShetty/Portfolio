@@ -158,7 +158,7 @@ export function getEngravingGeometry(id: string): THREE.BufferGeometry {
  * a click on the stone can tell whether it landed on the link.
  */
 export interface EngravingLink {
-  kind: "repo" | "demo";
+  kind: "repo" | "demo" | "cert";
   url: string;
   u0: number;
   u1: number;
@@ -208,6 +208,8 @@ type Run =
   not exist outside the browser.
 */
 const ICON_PATHS: Record<EngravingLink["kind"], string> = {
+  // A rosette: a medal ring over two ribbon tails. Drawn for this site.
+  cert: "M8 0.6a5.6 5.6 0 1 1 0 11.2A5.6 5.6 0 0 1 8 0.6Zm0 2.3a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6ZM5.1 11.3 3.9 15.7l2.1-1.1 1.4 1.5.5-3.7a6.7 6.7 0 0 1-2.8-1.1Zm5.8 0 1.2 4.4-2.1-1.1-1.4 1.5-.5-3.7a6.7 6.7 0 0 0 2.8-1.1Z",
   repo: "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z",
   demo: "M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM5.78 8.75a9.64 9.64 0 0 0 1.363 4.177c.255.426.542.832.857 1.215.245-.296.551-.705.857-1.215A9.64 9.64 0 0 0 10.22 8.75Zm4.44-1.5a9.64 9.64 0 0 0-1.363-4.177c-.307-.51-.612-.919-.857-1.215a9.927 9.927 0 0 0-.857 1.215A9.64 9.64 0 0 0 5.78 7.25Zm-5.944 1.5H1.543a6.507 6.507 0 0 0 4.666 5.5c-.123-.181-.24-.365-.352-.552-.715-1.192-1.437-2.874-1.581-4.948Zm-2.733-1.5h2.733c.144-2.074.866-3.756 1.58-4.948.12-.197.237-.381.353-.552a6.507 6.507 0 0 0-4.666 5.5Zm10.181 1.5c-.144 2.074-.866 3.756-1.58 4.948-.12.197-.237.381-.353.552a6.507 6.507 0 0 0 4.666-5.5Zm2.733-1.5a6.507 6.507 0 0 0-4.666-5.5c.123.181.24.365.353.552.714 1.192 1.436 2.874 1.58 4.948Z",
 };
@@ -258,6 +260,8 @@ function layout(
 ): { runs: Run[]; height: number; links: LinkRect[] } {
   const runs: Run[] = [];
   const maxWidth = CANVAS_W - PAD_X * 2;
+  // The orange labelling takes the stone's tint where it has one.
+  const accent = record.tint ?? SIGNAL.base;
   let y = 0;
 
   const setFont = (font: string, tracking: number) => {
@@ -277,7 +281,7 @@ function layout(
     tracking: eyebrowTracking,
     x: PAD_X,
     y,
-    tone: SIGNAL.base,
+    tone: accent,
   });
 
   // Title, followed by its marks: the GitHub mark, and a globe when there is
@@ -286,10 +290,11 @@ function layout(
   const titleSize = Math.round(132 * scale);
   const titleFont = `${titleSize}px ${fonts.serif}`;
   setFont(titleFont, 0);
-  const marks: { kind: EngravingLink["kind"]; url: string }[] = [
-    { kind: "repo", url: repoUrl(record) },
-  ];
+  const marks: { kind: EngravingLink["kind"]; url: string }[] = [];
+  const repo = repoUrl(record);
+  if (repo) marks.push({ kind: "repo", url: repo });
   if (record.demo) marks.push({ kind: "demo", url: record.demo });
+  if (record.certificate) marks.push({ kind: "cert", url: record.certificate });
   const iconSize = Math.round(titleSize * 0.44);
   const iconGap = Math.round(titleSize * 0.3);
   const marksWidth = marks.length * (iconSize + iconGap);
@@ -360,7 +365,7 @@ function layout(
         Math.round(Math.max(3, Math.round(4 * scale)) / 2),
       w: Math.round(40 * scale),
       h: Math.max(3, Math.round(4 * scale)),
-      tone: SIGNAL.base,
+      tone: accent,
     });
     for (const line of lines) {
       y += lineHeight;
@@ -395,7 +400,7 @@ function layout(
       tracking: stackTracking,
       x: PAD_X,
       y,
-      tone: SIGNAL.base,
+      tone: accent,
     });
   }
 

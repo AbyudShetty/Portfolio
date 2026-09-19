@@ -275,14 +275,93 @@ body[data-custom-cursor="true"] * {
   transition: opacity 0.52s cubic-bezier(0.6, 0, 0.9, 0.4);
 }
 
-.landing__cue {
-  margin: 0;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
+/*
+   The scroll mark. Bottom centre of the first screen, fading out over the
+   first few pixels of scroll (the transition smooths a single big wheel
+   step), so it is only ever an invitation, never furniture.
+*/
+.landing__scroll {
+  position: absolute;
+  left: 50%;
+  bottom: max(28px, 5vh);
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  opacity: calc(1 - clamp(0, calc(var(--p-landing) * 30), 1));
+  transition: opacity 450ms var(--ease-standard);
+  pointer-events: none;
 }
+
+/* Plain arrow heads, each lighting a beat after the one above it, so the
+   light runs downward through them. */
+.landing__scroll-arrow {
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-right: 2px solid #fff4e6;
+  border-bottom: 2px solid #fff4e6;
+  rotate: 45deg;
+  opacity: 0.22;
+  /* A soft warm glow, so each head reads as lit rather than drawn. */
+  filter: drop-shadow(0 0 4px rgba(255, 226, 190, 0.7));
+  animation: scroll-arrow 1.6s ease-in-out infinite;
+}
+
+.landing__scroll-arrow:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.landing__scroll-arrow:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Graduated: largest on top, smallest at the bottom — the mark narrows as
+   it points down, like a trail receding into the page. */
+.landing__scroll-arrow:nth-child(1) {
+  width: 16px;
+  height: 16px;
+  margin-top: 0;
+  border-width: 0 2.2px 2.2px 0;
+}
+
+.landing__scroll-arrow:nth-child(2) {
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-width: 0 2px 2px 0;
+}
+
+.landing__scroll-arrow:nth-child(3) {
+  width: 8px;
+  height: 8px;
+  margin-top: -2px;
+  border-width: 0 1.6px 1.6px 0;
+}
+
+@keyframes scroll-arrow {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate(-2px, -2px);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  70% {
+    opacity: 0.22;
+    transform: translate(1px, 1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing__scroll-arrow {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 
 /* ============================================================================
    02 — Experience
@@ -746,9 +825,29 @@ body[data-custom-cursor="true"] * {
   color: color-mix(in srgb, var(--signal) 86%, black);
 }
 
+/* Certifications label in their own yellow-orange, the hue their stones
+   catch the light in. */
+.pebble-label[data-domain="certification"] .pebble-label__meta {
+  color: #e3a33b;
+}
+
+.pebble-label[data-domain="certification"] .pebble-label__code {
+  color: color-mix(in srgb, #e3a33b 86%, black);
+}
+
 /* ============================================================================
    Instrument cursor
    ========================================================================= */
+
+/* The tail: drawn by InstrumentCursor, behind the reticle. */
+.cursor-trail {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 59;
+  pointer-events: none;
+}
 
 .cursor {
   position: fixed;
@@ -767,8 +866,12 @@ body[data-custom-cursor="true"] * {
   height: 6px;
   margin: -3px 0 0 -3px;
   border-radius: 50%;
-  background: var(--text-secondary);
-  opacity: 0.6;
+  /* The head of the shooting star: bright, with its own small glow. */
+  background: #fff6ea;
+  opacity: 0.9;
+  box-shadow:
+    0 0 5px 1px rgba(255, 238, 214, 0.55),
+    0 0 12px 2px rgba(255, 214, 170, 0.18);
   transition:
     width 140ms var(--ease-micro),
     height 140ms var(--ease-micro),

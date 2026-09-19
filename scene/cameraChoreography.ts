@@ -157,7 +157,7 @@ export const CAMERA_KEYFRAMES: CameraKeyframe[] = [
     at: progressAt(770),
     position: [0.3, 15.8, -15.2],
     target: [0, 0, -25.6],
-    portrait: { position: [0, 18, -18.5], target: [0, 0, -26.5] },
+    portrait: { position: [0, 19, -17], target: [0, 0, -28] },
   },
 
   // Descent — the stones grow and resolve.
@@ -165,26 +165,29 @@ export const CAMERA_KEYFRAMES: CameraKeyframe[] = [
     at: progressAt(910),
     position: [0, 15, -16],
     target: [0, 0, -25.6],
-    portrait: { position: [0, 14.5, -21], target: [0, 0, -26.5] },
+    portrait: { position: [0, 15, -19], target: [0, 0, -28] },
   },
 
-  // Inspection level, low and among them.
+  // Inspection level, low and among them. Eased back from its first framing
+  // so all fifteen stones sit inside the frame with equal margins either
+  // side (searched: 3.2 back, 0.5 across; centred within 0.3% of the frame
+  // at 16:9 and 16:10).
   // Pinned at 960vh. This used to read 1060, which was past the end of the
   // page and so silently clamped to it; with the ending after it, it has to
   // name the real scroll position or the field ending would stretch.
   {
     at: progressAt(960),
-    position: [-1.6, 7.5, -17.5],
-    target: [0.4, 0.2, -25.6],
-    portrait: { position: [0, 16, -24.5], target: [0, 0, -28] },
+    position: [-2.68, 9.61, -15.16],
+    target: [-0.1, 0.2, -25.6],
+    portrait: { position: [0, 16, -24], target: [0, 0, -29] },
   },
 
   // 04 — Ending. The field holds, still readable.
   {
     at: progressAt(1010),
-    position: [-1.6, 7.5, -17.5],
-    target: [0.4, 0.2, -25.6],
-    portrait: { position: [0, 16, -24.5], target: [0, 0, -28] },
+    position: [-2.68, 9.61, -15.16],
+    target: [-0.1, 0.2, -25.6],
+    portrait: { position: [0, 16, -24], target: [0, 0, -29] },
   },
 
   // Following the stones as they leave to the left.
