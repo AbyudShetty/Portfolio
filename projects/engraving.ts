@@ -381,8 +381,11 @@ function layout(
     }
   });
 
-  // Stack.
+  // Stack, where there is one: the toolkit stone is all stack and prints none.
   const stackSize = Math.round(34 * scale);
+  if (record.stack.length === 0) {
+    return { runs, height: y + Math.round(stackSize * 0.4), links };
+  }
   const stackFont = `${stackSize}px ${fonts.mono}`;
   const stackTracking = 3 * scale;
   setFont(stackFont, stackTracking);

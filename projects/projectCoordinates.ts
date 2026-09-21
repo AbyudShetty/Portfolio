@@ -42,11 +42,17 @@ export interface Coordinate {
 export const FIELD_CENTER: [number, number, number] = [0, 0, -25.6];
 
 /**
- * Row structure of the puddle, top-down: 5 / 5 / 5 — the thirteen projects
- * and the two certifications as one bunch, the certifications at the right
- * end of the front and middle rows. Centred on FIELD_CENTER (centroid within
- * 0.01), every stone at least 2.9 units from its neighbours, unevenly set so
- * it never reads as a grid. (Portrait screens use their own rows, below.)
+ * Row structure of the puddle, top-down: four staggered rows of four — the
+ * thirteen projects, the two certifications and the toolkit as one bunch.
+ * Re-solved when the toolkit joined: rows of five were wide and shallow,
+ * which pushed every camera back and left names 16px apart; four rows of
+ * four are narrower and deeper, so the rows separate vertically under an
+ * overhead camera and no two names come closer than 86px. Each row is offset
+ * from the last, the toolkit ends the front row (bottom right of frame), and
+ * the two certifications sit together on the right of the next two rows.
+ * Centred on FIELD_CENTER, every stone at least 2.99 units from its
+ * neighbours, unevenly set so it never reads as a grid. (Portrait screens
+ * use their own rows, below.)
  *
  * Recomposed for thirteen stones. The twelfth-stone layout had no room for a
  * thirteenth that did not read as a row of its own, so every gathered
@@ -66,87 +72,87 @@ export const COORDINATES: Record<string, Coordinate> = {
     portrait: [-2.2, 0.15, 0],
   },
 
-  // ── Front row (4) ───────────────────────────────────────────────────────
+  // ── Front row: three projects, then the toolkit ─────────────────────────
   splats: {
     code: "XR-01",
     scattered: [-16.5, 4.2, -30],
-    gathered: [-5.9, 0.42, -22.9],
+    gathered: [-5.75, 0.16, -21.39],
     portrait: [-3.6, 0.35, -19.8],
   },
   cardiotriage: {
     code: "SIM-02",
     scattered: [7.5, 5.6, -21],
-    gathered: [-2.95, 0.55, -22.3],
+    gathered: [-2.42, -0.08, -21.57],
     portrait: [0.1, 0.5, -20.1],
   },
   aegis: {
     code: "SYS-01",
     scattered: [18.5, 2.4, -33],
-    gathered: [0.05, 0.38, -22.6],
+    gathered: [0.92, 0.11, -21.4],
     portrait: [3.6, 0.3, -19.7],
   },
   affordability: {
     code: "AI-04",
     scattered: [-2.5, 8.8, -37],
-    gathered: [3.0, 0.1, -22.4],
+    gathered: [-5.59, 0.03, -26.93],
     portrait: [-1.8, 0.15, -23.2],
   },
 
-  // ── Middle row (4) ──────────────────────────────────────────────────────
+  // ── Second row ──────────────────────────────────────────────────────────
   kirana: {
     code: "AI-01",
     scattered: [-20, -3.5, -25],
-    gathered: [-6.35, 0.18, -25.8],
+    gathered: [-4.12, -0.04, -24.29],
     portrait: [1.9, 0.2, -23.4],
   },
   astronaut: {
     code: "SIM-01",
     scattered: [-9, 6.5, -44],
-    gathered: [-3.2, 0.62, -25.4],
+    gathered: [-0.75, -0.13, -24.28],
     portrait: [-3.7, 0.5, -26.5],
   },
   msgrouter: {
     code: "AI-02",
     scattered: [12, -5.2, -38],
-    gathered: [-0.05, 0.3, -25.7],
+    gathered: [2.43, -0.27, -24.26],
     portrait: [0, 0.3, -26.8],
   },
   miniraft: {
     code: "SYS-02",
     scattered: [22, 5.5, -27],
-    gathered: [3.1, 0.22, -25.4],
+    gathered: [-2.52, 0.01, -26.99],
     portrait: [3.6, 0.2, -26.4],
   },
 
-  // ── Back row (5) ────────────────────────────────────────────────────────
+  // ── Third and fourth rows ───────────────────────────────────────────────
   vrata: {
     code: "RES-01",
     scattered: [-24, 1.8, -47],
-    gathered: [-6.1, -0.15, -28.8],
+    gathered: [-4.09, 0.2, -29.65],
     portrait: [-1.9, -0.1, -30.1],
   },
   medivault: {
     code: "AI-03",
     scattered: [-13, -6.2, -34],
-    gathered: [-3.05, 0.1, -28.5],
+    gathered: [-0.78, 0.24, -29.79],
     portrait: [1.8, 0.1, -29.9],
   },
   ipl: {
     code: "PRD-01",
     scattered: [4, -7.5, -50],
-    gathered: [0, -0.05, -28.9],
+    gathered: [0.83, -0.14, -27.06],
     portrait: [-3.6, 0, -33.2],
   },
   realitycompiler: {
     code: "PRD-02",
     scattered: [16, 7.2, -46],
-    gathered: [3.05, 0.15, -28.6],
+    gathered: [2.33, -0.05, -29.65],
     portrait: [0, 0.15, -33.5],
   },
   hcrm: {
     code: "PRD-03",
     scattered: [25, -2.6, -40],
-    gathered: [6.15, -0.2, -28.8],
+    gathered: [5.77, -0.19, -29.64],
     portrait: [3.7, -0.15, -33.1],
   },
 
@@ -156,14 +162,26 @@ export const COORDINATES: Record<string, Coordinate> = {
   dlcert: {
     code: "CRT-01",
     scattered: [27, 3.5, -36],
-    gathered: [6.3, 0.25, -25.9],
-    portrait: [-1.8, 0.25, -36.7],
+    gathered: [4.13, -0.15, -26.99],
+    portrait: [-3.5, 0.25, -36.7],
   },
   llmcert: {
     code: "CRT-02",
     scattered: [24, -4.5, -45],
-    gathered: [5.95, 0.3, -22.9],
-    portrait: [1.9, 0.2, -36.9],
+    gathered: [5.6, -0.18, -24.25],
+    portrait: [0, 0.2, -37],
+  },
+
+  // ── The toolkit (1) ─────────────────────────────────────────────────────
+  // A step in front of the front row on the right: bottom-right of frame in
+  // every field shot, close enough to belong to the bunch, apart enough to
+  // read as a different kind of thing. Portrait puts it beside the two
+  // certifications in the last row.
+  toolkit: {
+    code: "KIT-00",
+    scattered: [21, -7, -30],
+    gathered: [3.99, -0.11, -21.46],
+    portrait: [3.5, 0.3, -36.6],
   },
 };
 
@@ -198,4 +216,5 @@ export const DOMAIN_ORDER: Domain[] = [
   "systems",
   "product",
   "certification",
+  "toolkit",
 ];

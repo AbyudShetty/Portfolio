@@ -24,6 +24,16 @@ import { progressAt } from "./cameraChoreography";
 export const REVEAL_START = progressAt(70);
 export const REVEAL_END = progressAt(200);
 
+/**
+ * A late arrival, for objects that belong to the field rather than to the
+ * world: they are absent through the hero, the About and the Experience, and
+ * come in only as the field gathers — the toolkit stone, whose blue among
+ * the drifting graphite ones would be a question the Experience never
+ * answers. See `arrivesWithField` in ProjectData.
+ */
+export const LATE_REVEAL_START = progressAt(600);
+export const LATE_REVEAL_END = progressAt(690);
+
 /** The gathering. Complete slightly before the overhead keyframe settles. */
 export const CONVERGE_START = progressAt(580);
 export const CONVERGE_END = progressAt(750);
@@ -58,6 +68,13 @@ export function revealFactor(progress: number, stagger = 0): number {
   const start = REVEAL_START + window * 0.35 * stagger;
   const end = start + window * 0.65;
   return easeOutCubic((progress - start) / (end - start));
+}
+
+/** Emergence for an object that arrives with the field, not with the world. */
+export function lateRevealFactor(progress: number): number {
+  return easeOutCubic(
+    (progress - LATE_REVEAL_START) / (LATE_REVEAL_END - LATE_REVEAL_START),
+  );
 }
 
 /**

@@ -36,6 +36,7 @@ export const DOMAIN_ACCENT = {
   research: "#A88C4E", // Brass
   product: "#7A8290", // Slate
   certification: "#E3A33B", // Marigold — certifications only
+  toolkit: "#6FA8C7", // Cyanotype — the toolkit stone only
   experience: SIGNAL.base, // Signal — experience only
 } as const;
 
@@ -48,6 +49,7 @@ export const DOMAIN_LABEL = {
   systems: "SYSTEMS",
   product: "PRODUCT",
   certification: "CERTIFICATION",
+  toolkit: "SKILLS",
   experience: "EXPERIENCE",
 } as const;
 

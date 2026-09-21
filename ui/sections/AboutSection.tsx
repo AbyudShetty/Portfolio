@@ -108,6 +108,7 @@ export function AboutContent({ staged }: { staged: boolean }) {
           {ABOUT.closing}
         </p>
       </section>
+
     </div>
   );
 }

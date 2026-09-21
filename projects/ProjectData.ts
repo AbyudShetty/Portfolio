@@ -20,6 +20,7 @@ export type Domain =
   | "systems"
   | "product"
   | "certification"
+  | "toolkit"
   | "experience";
 
 /** Rank drives depth, scale, clarity and motion mass. DESIGN.md §7.1, §4.2, §6.1. */
@@ -39,7 +40,8 @@ export type StatusKind =
   | "research"
   | "team"
   | "coursework"
-  | "certificate";
+  | "certificate"
+  | "toolkit";
 
 export interface Status {
   kind: StatusKind;
@@ -86,6 +88,11 @@ export interface ProjectRecord {
   demo?: string;
   /** The certificate itself, for a certification stone. */
   certificate?: string;
+  /**
+   * Absent until the field gathers, rather than drifting through the hero,
+   * the About and the Experience with everything else.
+   */
+  arrivesWithField?: boolean;
   /**
    * The colour of the warm light the stone catches. Every stone is the same
    * graphite glass lit by the scene's orange bounce; a stone with a tint
@@ -422,6 +429,34 @@ export const PROJECTS: ProjectRecord[] = [
     stack: ["NPTEL", "IIT Delhi", "IIT Bombay", "Jul–Oct 2025"],
     status: [{ kind: "certificate", label: "NPTEL · CERTIFIED" }],
     year: "2025",
+  },
+
+  // ── TOOLKIT ───────────────────────────────────────────────────────────────
+  // Not a project: what every other stone in the field is made of, given a
+  // stone of its own so the field can say it without a caption laid over it.
+  // Blue, where the work is orange.
+  {
+    id: "toolkit",
+    name: "Toolkit",
+    domain: "toolkit",
+    tier: "featured-2",
+    summary:
+      "What the work in this field is built with: languages, backend, AI/ML, 3D, systems, and how it is tested and shipped.",
+    points: [
+      "Languages — Python, Java, TypeScript, Kotlin, SQL, C++.",
+      "Backend — Spring Boot, Django REST, FastAPI, PostgreSQL, Celery, WebSockets.",
+      "AI / ML — PyTorch, scikit-learn, OpenCV, XGBoost, LLM APIs, NumPy and Pandas.",
+      "3D & XR — Three.js, React Three Fiber, OpenGL, Unity, Blender.",
+      "Systems — distributed systems, RAFT, secure MPC, ESP32 and ESP-NOW, quaternions and IK.",
+      "Testing & DevOps — JUnit 5, PyTest, Locust, Docker, CI/CD, Linux.",
+    ],
+    tint: "#6FA8C7",
+    // Blue among the drifting graphite stones raises a question the
+    // Experience never answers, so this one waits for the field.
+    arrivesWithField: true,
+    stack: [],
+    status: [{ kind: "toolkit", label: "THE FIELD'S OWN GROUND" }],
+    year: "2026",
   },
 ];
 

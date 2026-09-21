@@ -22,6 +22,7 @@ import { portraitMix } from "@/scene/viewport";
 import {
   convergeFactor,
   easeOutCubic,
+  lateRevealFactor,
   revealFactor,
   smoothstep01,
 } from "@/scene/reveal";
@@ -63,8 +64,8 @@ const _exit = new THREE.Vector3();
 const _home = new THREE.Vector3();
 
 /** The field's left and right edges (gathered x), for leftmost-first order. */
-const FIELD_X_MIN = -6.8;
-const FIELD_X_SPAN = 13.9;
+const FIELD_X_MIN = -5.8;
+const FIELD_X_SPAN = 11.6;
 /** How far a stone travels left as it leaves, in world units. */
 const EXIT_DISTANCE = 34;
 
@@ -318,7 +319,11 @@ void main() {`,
 
     // ── 1. Emergence. Absent from the hero entirely: the title is a
     // protected zone, and an invisible object is the only guarantee.
-    const reveal = reducedMotion ? 1 : revealFactor(progress, revealStagger);
+    const reveal = reducedMotion
+      ? 1
+      : record.arrivesWithField
+        ? lateRevealFactor(progress)
+        : revealFactor(progress, revealStagger);
     if (reveal <= 0.001) {
       if (g.visible) g.visible = false;
       return;

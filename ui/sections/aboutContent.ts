@@ -16,6 +16,11 @@ export interface EducationStop {
   coursework?: string[];
 }
 
+export interface SkillGroup {
+  label: string;
+  items: string[];
+}
+
 export interface Highlight {
   lead: string;
   detail: string;
@@ -62,6 +67,60 @@ export const ABOUT = {
       stage: "Schooling",
     },
   ] satisfies EducationStop[],
+
+  toolkitTitle: "Toolkit",
+
+  /**
+   * What he actually works in, grouped the way the work groups. Taken from
+   * the résumé and kept to what has been used in something real, so the list
+   * is a claim he can answer questions about rather than a word cloud.
+   */
+  toolkit: [
+    {
+      label: "Languages",
+      items: ["Python", "Java", "TypeScript", "Kotlin", "SQL", "C++"],
+    },
+    {
+      label: "Backend",
+      items: [
+        "Spring Boot",
+        "Django REST",
+        "FastAPI",
+        "PostgreSQL",
+        "Celery",
+        "WebSockets",
+      ],
+    },
+    {
+      label: "AI / ML",
+      items: [
+        "PyTorch",
+        "scikit-learn",
+        "OpenCV",
+        "XGBoost",
+        "LLM APIs",
+        "NumPy · Pandas",
+      ],
+    },
+    {
+      label: "3D & XR",
+      items: ["Three.js", "React Three Fiber", "OpenGL", "Unity", "Blender"],
+    },
+    {
+      label: "Systems",
+      items: [
+        "Distributed systems",
+        "RAFT",
+        "Secure MPC",
+        "ESP32 · ESP-NOW",
+        "Quaternions & IK",
+      ],
+    },
+    {
+      label: "Testing & DevOps",
+      items: ["JUnit 5", "PyTest", "Locust", "Docker", "CI/CD", "Linux"],
+    },
+  ] satisfies SkillGroup[],
 
   highlightsTitle: "Along the way",
 

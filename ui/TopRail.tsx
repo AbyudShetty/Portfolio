@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { readout } from "@/hooks/useFieldState";
 import type { SectionId } from "@/scene/cameraChoreography";
+import type { ConsoleMode } from "@/ui/Console";
 
 /**
  * TopRail — name, live readout, section.
@@ -16,7 +17,14 @@ import type { SectionId } from "@/scene/cameraChoreography";
  * The readout updates every frame, so it is written straight to the DOM from
  * an animation loop rather than held in React state.
  */
-export function TopRail({ activeSection }: { activeSection: SectionId }) {
+export function TopRail({
+  activeSection,
+  onOpen,
+}: {
+  activeSection: SectionId;
+  /** Opens the console (ui/Console.tsx): the index, or the way to write. */
+  onOpen?: (mode: ConsoleMode) => void;
+}) {
   const codeRef = useRef<HTMLSpanElement>(null);
   const coordRef = useRef<HTMLSpanElement>(null);
 
@@ -58,7 +66,29 @@ export function TopRail({ activeSection }: { activeSection: SectionId }) {
         </span>
       </div>
 
-      <span className="rail__section">{activeSection.toUpperCase()}</span>
+      <div className="rail__right">
+        <span className="rail__section">{activeSection.toUpperCase()}</span>
+        {onOpen ? (
+          <>
+            {/* Two ways out of the journey, for a reader who has ten seconds
+                or something to say. Quiet until wanted. */}
+            <button
+              type="button"
+              className="rail__action"
+              onClick={() => onOpen("index")}
+            >
+              Index
+            </button>
+            <button
+              type="button"
+              className="rail__action"
+              onClick={() => onOpen("contact")}
+            >
+              Contact
+            </button>
+          </>
+        ) : null}
+      </div>
     </header>
   );
 }

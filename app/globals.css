@@ -199,6 +199,20 @@ body[data-custom-cursor="true"] * {
   color: var(--text-primary);
 }
 
+/* The line under the name: what he is, before what he has made. Set as
+   instrument type — small, spaced, quiet — so it reads as a caption to the
+   name rather than competing with it. */
+.landing__role {
+  margin: 20px 0 0;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  text-wrap: balance;
+}
+
 .landing__links {
   display: flex;
   align-items: center;
@@ -747,6 +761,37 @@ body[data-custom-cursor="true"] * {
   min-width: 6ch;
 }
 
+/* The section, and the two console actions, at the right of the rail. */
+.rail__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.rail__action {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 160ms var(--ease-micro);
+}
+
+.rail__action:hover {
+  color: var(--signal);
+}
+
+.rail__action:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 4px;
+}
+
 .rail__section {
   justify-self: end;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
@@ -797,20 +842,33 @@ body[data-custom-cursor="true"] * {
   font-size: 13px;
   letter-spacing: -0.005em;
   color: var(--text-primary);
-  /* A short shadow so a name stays readable if a stone passes behind it. */
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  /* Seated the same way as the line under it: short shadow for the stones'
+     specular sweep, wider one for the sky. */
+  text-shadow:
+    0 1px 2px rgba(5, 6, 7, 0.95),
+    0 0 10px rgba(5, 6, 7, 0.8);
 }
 
+/*
+   The domain line sits directly over the stones, whose specular sweep is the
+   brightest thing in the frame. At the signal's own value it disappeared into
+   those highlights, so it is lifted toward white and given a tight dark halo
+   — a short shadow for contrast against the sweep, a wider one to seat it
+   against the sky — rather than made bigger.
+*/
 .pebble-label__meta {
   display: flex;
   align-items: center;
   gap: 8px;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 9px;
+  font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--signal);
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
+  color: color-mix(in srgb, var(--signal) 72%, white);
+  text-shadow:
+    0 1px 2px rgba(5, 6, 7, 0.95),
+    0 0 9px rgba(5, 6, 7, 0.85);
 }
 
 /* Hover raises prominence through the label's opacity; the domain keeps its
@@ -822,17 +880,25 @@ body[data-custom-cursor="true"] * {
 /* The coordinate sits a shade under the domain: the same orange, very
    slightly darkened, so the pair reads as one line with a clear lead word. */
 .pebble-label__code {
-  color: color-mix(in srgb, var(--signal) 86%, black);
+  color: color-mix(in srgb, var(--signal) 82%, white);
 }
 
-/* Certifications label in their own yellow-orange, the hue their stones
-   catch the light in. */
+/* Certifications and the toolkit label in their own hue — the one their
+   stones catch the light in — rather than the field's orange. */
 .pebble-label[data-domain="certification"] .pebble-label__meta {
-  color: #e3a33b;
+  color: color-mix(in srgb, #e3a33b 72%, white);
 }
 
 .pebble-label[data-domain="certification"] .pebble-label__code {
-  color: color-mix(in srgb, #e3a33b 86%, black);
+  color: color-mix(in srgb, #e3a33b 82%, white);
+}
+
+.pebble-label[data-domain="toolkit"] .pebble-label__meta {
+  color: color-mix(in srgb, #6fa8c7 72%, white);
+}
+
+.pebble-label[data-domain="toolkit"] .pebble-label__code {
+  color: color-mix(in srgb, #6fa8c7 82%, white);
 }
 
 /* ============================================================================

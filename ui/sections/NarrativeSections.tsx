@@ -2,6 +2,7 @@
 
 import { SECTION_VH } from "@/scene/cameraChoreography";
 import { EXPERIENCE_RECORD } from "@/projects/ProjectData";
+import { PROFILE_LINKS } from "@/lib/contact";
 import { ProjectList } from "@/ui/ProjectList";
 
 /**
@@ -28,14 +29,6 @@ const PIPELINE = [
   "3D AVATAR",
 ];
 
-export const SOCIALS = [
-  { label: "GitHub", href: "https://github.com/AbyudShetty" },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/abyud-somashekara-shetty-9051182ab/",
-  },
-];
-
 export function LandingSection() {
   return (
     <section
@@ -47,17 +40,24 @@ export function LandingSection() {
       <div className="section__sticky landing">
         <h1 className="landing__name">Abyud Shetty</h1>
 
+        {/* What he is, in four words: the first screen used to say only the
+            name, which tells a reader with ten seconds nothing. */}
+        <p className="landing__role">
+          CS Undergrad · AI/ML · Full Stack · 3D &amp; XR
+        </p>
+
         <div className="landing__meta">
-          <nav className="landing__links" aria-label="Profiles">
-            {SOCIALS.map((social) => (
+          <nav className="landing__links" aria-label="Profiles and contact">
+            {PROFILE_LINKS.map((link) => (
               <a
-                key={social.label}
+                key={link.label}
                 className="landing__link"
-                href={social.href}
-                target="_blank"
-                rel="noreferrer noopener"
+                href={link.href}
+                {...(link.external
+                  ? { target: "_blank", rel: "noreferrer noopener" }
+                  : {})}
               >
-                {social.label}
+                {link.label}
               </a>
             ))}
           </nav>

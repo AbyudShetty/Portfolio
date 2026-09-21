@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   detectWebGLSupport,
@@ -11,6 +11,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
 import { useMounted } from "@/hooks/useViewport";
 import { useReliveAtEnd } from "@/ui/relive";
+import { Console, type ConsoleMode } from "@/ui/Console";
 import { FieldFallback } from "@/ui/FieldFallback";
 import { InstrumentCursor } from "@/ui/InstrumentCursor";
 import { ProjectList } from "@/ui/ProjectList";
@@ -45,6 +46,9 @@ export default function Page() {
   const reducedMotion = useReducedMotion();
   const activeSection = useScrollProgress();
   const [capable, setCapable] = useState<boolean | null>(null);
+  // The index and the contact panel, opened from the rail.
+  const [consoleMode, setConsoleMode] = useState<ConsoleMode | null>(null);
+  const closeConsole = useCallback(() => setConsoleMode(null), []);
 
   // The bottom of the page is a room of the tesseract; arriving there
   // returns the reader to the beginning.
@@ -71,7 +75,7 @@ export default function Page() {
     <main className="page" data-section={activeSection}>
       {mounted && capable ? <SpaceScene /> : null}
 
-      <TopRail activeSection={activeSection} />
+      <TopRail activeSection={activeSection} onOpen={setConsoleMode} />
 
       <article className="narrative">
         <LandingSection />
@@ -93,6 +97,8 @@ export default function Page() {
       {/* One stone at a time, held up to the lens. Mounted outside the
           narrative so it sits above the canvas and below nothing. */}
       <SpecimenPanel reducedMotion={reducedMotion} />
+
+      <Console mode={consoleMode} onClose={closeConsole} />
 
       <InstrumentCursor />
       <div className="grain" aria-hidden="true" />

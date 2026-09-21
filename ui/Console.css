@@ -1,0 +1,246 @@
+/* ============================================================================
+   Console — the index and the contact panel, in the instrument's language
+   ========================================================================= */
+
+.console {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 48px);
+  pointer-events: none;
+}
+
+/* The scene stays visible behind it: this is a drawer over the journey, not
+   a page that replaces it. */
+.console__scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(5, 6, 7, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: console-in 260ms var(--ease-standard) both;
+}
+
+.console__panel {
+  position: relative;
+  width: min(62rem, 100%);
+  max-height: min(76vh, 46rem);
+  overflow-y: auto;
+  padding: clamp(20px, 3vw, 34px);
+  background: var(--glass-deep, rgba(14, 16, 17, 0.86));
+  backdrop-filter: blur(28px) saturate(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.05);
+  border: 1px solid var(--edge-hairline);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  outline: none;
+  animation: console-rise 320ms var(--ease-standard) both;
+}
+
+.console[data-mode="contact"] .console__panel {
+  width: min(34rem, 100%);
+}
+
+@keyframes console-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes console-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ── Head ───────────────────────────────────────────────────────────────── */
+
+.console__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--edge-hairline);
+}
+
+.console__title {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.console__note {
+  grid-column: 1;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.console__close {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: start;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-tertiary);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.console__close:hover {
+  color: var(--text-primary);
+  border-color: var(--edge-hairline);
+}
+
+/* ── Index ──────────────────────────────────────────────────────────────── */
+
+.console__index {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.console__entry {
+  display: grid;
+  grid-template-columns: 14px 62px 1fr auto;
+  align-items: baseline;
+  gap: 4px 12px;
+  width: 100%;
+  padding: 13px 4px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--graphite-700);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms var(--ease-micro);
+}
+
+.console__entry:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.console__entry:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: -1px;
+}
+
+.console__rule {
+  height: 1px;
+  align-self: center;
+  opacity: 0.85;
+}
+
+.console__code,
+.console__domain {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.console__name {
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.console__summary {
+  grid-column: 3 / -1;
+  max-width: 62ch;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ── Contact ────────────────────────────────────────────────────────────── */
+
+.console__contact {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.console__line {
+  display: grid;
+  grid-template-columns: 74px 1fr auto;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 4px;
+  border-top: 1px solid var(--graphite-700);
+  text-decoration: none;
+  transition: background-color 160ms var(--ease-micro);
+}
+
+.console__line:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.console__line:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: -1px;
+}
+
+.console__value {
+  font-size: 15px;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.console__arrow {
+  font-size: 12px;
+  color: var(--text-disabled);
+  transition: color 140ms ease;
+}
+
+.console__line:hover .console__arrow {
+  color: var(--signal);
+}
+
+/* ── Phones ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .console__panel {
+    max-height: 82vh;
+  }
+
+  .console__entry {
+    grid-template-columns: 12px 54px 1fr;
+  }
+
+  .console__domain {
+    grid-column: 2 / -1;
+  }
+
+  .console__summary {
+    grid-column: 2 / -1;
+    font-size: 12px;
+  }
+
+  .console__line {
+    grid-template-columns: 64px 1fr auto;
+    gap: 10px;
+  }
+}
