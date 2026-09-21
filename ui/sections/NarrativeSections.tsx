@@ -4,6 +4,7 @@ import { SECTION_VH } from "@/scene/cameraChoreography";
 import { EXPERIENCE_RECORD } from "@/projects/ProjectData";
 import { PROFILE_LINKS } from "@/lib/contact";
 import { ProjectList } from "@/ui/ProjectList";
+import { LabPlates } from "@/ui/sections/LabPlates";
 
 /**
  * The narrative, as an ordinary scrollable document.
@@ -93,30 +94,40 @@ export function ExperienceSection() {
             {record.name}
           </h2>
           <p className="experience__meta">
-            {record.org ? `${record.org} · ` : ""}Internship · {record.year}
+            {record.org ? `${record.org} · ` : ""}Software Development Intern ·{" "}
+            {record.year}
           </p>
-          <ul className="experience__points">
-            {(record.narrative ?? [record.summary]).map((point) => (
-              <li key={point} className="experience__point">
-                {point}
-              </li>
-            ))}
-          </ul>
+          {/* Two beats in one box: the pipeline in words, then the lab's own
+              plates of it, in the same place (LabPlates.tsx). The signal
+              path and the stack belong to the words and leave with them, so
+              the plates have the whole box. */}
+          <div className="experience__story" data-beat="story">
+            <div className="experience__words">
+              <ul className="experience__points">
+                {(record.narrative ?? [record.summary]).map((point) => (
+                  <li key={point} className="experience__point">
+                    {point}
+                  </li>
+                ))}
+              </ul>
 
-          <h3 className="sr-only">Pipeline</h3>
-          <ol className="pipeline" aria-label="Signal path">
-            {PIPELINE.map((stage) => (
-              <li key={stage} className="pipeline__stage">
-                {stage}
-              </li>
-            ))}
-          </ol>
+              <h3 className="sr-only">Pipeline</h3>
+              <ol className="pipeline" aria-label="Signal path">
+                {PIPELINE.map((stage) => (
+                  <li key={stage} className="pipeline__stage">
+                    {stage}
+                  </li>
+                ))}
+              </ol>
 
-          <ul className="stack" aria-label="Technologies">
-            {record.stack.map((tech) => (
-              <li key={tech}>{tech}</li>
-            ))}
-          </ul>
+              <ul className="stack" aria-label="Technologies">
+                {record.stack.map((tech) => (
+                  <li key={tech}>{tech}</li>
+                ))}
+              </ul>
+            </div>
+            <LabPlates />
+          </div>
         </div>
       </div>
     </section>

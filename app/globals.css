@@ -568,6 +568,16 @@ body[data-custom-cursor="true"] * {
   opacity: min(1, calc(var(--p-projects) * 8));
 }
 
+/* ...except while a stone and its screen share the frame: the stone steps
+   left under the heading (projects/screenLayout.ts), so the heading gives way
+   as it arrives and returns as it goes. */
+:root[data-specimen-paired="true"] .projects__heading {
+  opacity: calc(
+    min(1, calc(var(--p-projects) * 8)) *
+      (1 - clamp(0, calc(var(--specimen-presence, 0) * 1.6), 1))
+  );
+}
+
 .projects__title {
   margin: 0;
   font-family: var(--font-instrument-serif), Georgia, serif;

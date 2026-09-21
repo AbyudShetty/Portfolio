@@ -1,0 +1,151 @@
+/* ============================================================================
+   SpecimenScreen — the project running, beside its stone
+   ========================================================================= */
+
+/*
+  To the right of the stone, the two centred as a pair (screenLayout.ts
+  places both). Turned toward the stone like the wing of a triptych, and arriving
+  after it: it slides out from behind the stone once the stone is nearly at
+  the lens (--specimen-presence), never before.
+*/
+.screen-plate {
+  --in: clamp(0, calc((var(--specimen-presence, 0) - 0.7) / 0.3), 1);
+  position: absolute;
+  top: 50%;
+  left: var(--plate-left, 60%);
+  width: var(--plate-width, 360px);
+  margin: 0;
+  display: grid;
+  gap: 12px;
+  pointer-events: auto;
+  opacity: var(--in);
+  translate: calc((1 - var(--in)) * -70px) -50%;
+  /* Hinged on its inner edge, outer edge swung toward the reader. */
+  transform: perspective(1400px) rotateY(11deg)
+    scale(calc(0.94 + 0.06 * var(--in)));
+  transform-origin: 0% 50%;
+}
+
+/* The hairline back to the stone, in the stone's colour: the screen belongs
+   to this stone, not to the field. */
+.screen-plate::before {
+  content: "";
+  position: absolute;
+  top: 38%;
+  right: 100%;
+  width: calc(56px * var(--in));
+  height: 1px;
+  margin-right: 10px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  opacity: 0.8;
+}
+
+.screen-plate::after {
+  content: "";
+  position: absolute;
+  top: calc(38% - 2.5px);
+  right: calc(100% + 8px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  opacity: var(--in);
+}
+
+/* The screen: a window onto the screenshot, which the tour moves behind. */
+.screen-plate__window {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  border-radius: 8px;
+  background: #0d0f14;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 42px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 24px 60px rgba(0, 0, 0, 0.6);
+  transition:
+    border-color 240ms var(--ease-standard),
+    box-shadow 240ms var(--ease-standard);
+}
+
+.screen-plate__window img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+/* Glass: a faint sheen across the top and fine scan lines, so it reads as a
+   screen in the scene rather than a picture pasted over it. */
+.screen-plate__window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0) 38%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.12) 0 1px,
+      transparent 1px 3px
+    );
+  mix-blend-mode: normal;
+}
+
+.screen-plate__window:hover,
+.screen-plate__window:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 56px color-mix(in srgb, var(--accent) 26%, transparent),
+    0 24px 60px rgba(0, 0, 0, 0.6);
+  outline: none;
+}
+
+.screen-plate__caption {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  /* Legible over whatever stones of the field lie behind it. */
+  text-shadow:
+    0 0 6px rgba(5, 6, 7, 0.95),
+    0 1px 14px rgba(5, 6, 7, 0.9);
+}
+
+.screen-plate__code {
+  color: var(--accent);
+}
+
+.screen-plate__open {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  transition: color 200ms var(--ease-standard);
+}
+
+.screen-plate:has(.screen-plate__window:hover) .screen-plate__open,
+.screen-plate:has(.screen-plate__window:focus-visible) .screen-plate__open {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-plate {
+    translate: 0 -50%;
+    transform: perspective(1400px) rotateY(11deg);
+  }
+}

@@ -38,10 +38,15 @@ export const SPAWN_FADE = { start: progressAt(307), end: progressAt(340) };
 export const ASTRONAUT_HOLD = { start: progressAt(384), end: progressAt(484) };
 
 /**
- * A slow drift to the right across 21–29% of the journey — the last thing the
- * figure does before it leaves, and the beat that sets up the exit.
+ * A slow drift to the right — the last thing the figure does before it
+ * leaves, and the beat that sets up the exit.
+ *
+ * Held back until the Experience panel has turned from words to the lab
+ * plates (ui/sections/lab-plates.css: the words are gone by 0.46 of the
+ * section, 500vh). Drifting earlier carried the figure's arm under the left
+ * edge of the text while it was still being read.
  */
-export const ASTRONAUT_DRIFT = { start: progressAt(423), end: progressAt(477) };
+export const ASTRONAUT_DRIFT = { start: progressAt(502), end: progressAt(548) };
 
 /**
  * The figure leaves through the bottom-left of the frame while

@@ -7,6 +7,7 @@ import { fieldActions, useFieldState } from "@/hooks/useFieldState";
 import { getProject, repoUrl } from "@/projects/ProjectData";
 import { getCoordinate } from "@/projects/projectCoordinates";
 import { adjacentSpecimens, stepSpecimen } from "@/projects/specimen";
+import { SpecimenScreen, SpecimenScreenButton } from "@/ui/SpecimenScreen";
 
 import "./SpecimenPanel.css";
 
@@ -197,6 +198,16 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
         </footer>
       </div>
 
+      {/* The project running, beside the stone, where it has a screenshot
+          and the frame has room (SpecimenScreen.tsx). Keyed so a jump
+          between stones starts it afresh. */}
+      <SpecimenScreen
+        key={`screen-${record.id}`}
+        projectId={record.id}
+        accent={accent}
+        reducedMotion={reducedMotion}
+      />
+
       {/* Stepping controls sit outside the stone, in the empty frame either
           side of it, so they never take room from the copy. */}
       <button
@@ -253,6 +264,7 @@ export function SpecimenPanel({ reducedMotion }: { reducedMotion: boolean }) {
               <span aria-hidden="true">↗</span>
             </a>
           ) : null}
+          <SpecimenScreenButton projectId={record.id} />
           <button type="button" className="specimen__return" onClick={close}>
             Close
             <span aria-hidden="true">×</span>

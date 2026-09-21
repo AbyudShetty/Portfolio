@@ -123,6 +123,7 @@ export const PROJECTS: ProjectRecord[] = [
       "The hubs forward those readings over UDP to a SlimeVR server written in Kotlin, which solves inverse kinematics: ten sensors in, the pose of a whole skeleton out.",
       "That pose streams over WebSocket to a Three.js viewer in the browser, where a rigged 3D character moves as the wearer moves.",
       "The entire pipeline is containerised with Docker, so it goes from hardware to avatar with a single command.",
+      "On top of it, the applications: a Yoga Studio that scores a live pose against a reference joint by joint, physiotherapy exercise tracking, and cricket bowling action analysis.",
     ],
     points: [
       "Ten body-worn ESP32 + MPU6050 nodes speak ESP-NOW to two hubs, which forward over UDP.",

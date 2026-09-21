@@ -1,0 +1,238 @@
+/* ============================================================================
+   The lab plates — the Experience's second beat
+   ========================================================================= */
+
+/*
+  The words (with the signal path and the stack) and the plates share one box, stacked in a single grid cell, so
+  the panel keeps its size and place while one gives way to the other. The
+  words leave over 0.42–0.46 of the section; the plates then develop one at
+  a time from 0.47 (each plate's --at), while the camera still holds the
+  astronaut. LabPlates.tsx sets data-beat so only the visible beat takes
+  clicks.
+*/
+.experience__story {
+  display: grid;
+}
+
+.experience__story > * {
+  grid-area: 1 / 1;
+  /* Each beat keeps its own height: stretched to the taller one, the list
+     of points would spread its rows apart. */
+  align-self: start;
+  min-width: 0;
+}
+
+.experience__story .experience__words {
+  opacity: calc(1 - clamp(0, calc((var(--p-experience) - 0.42) / 0.04), 1));
+  transform: translateY(
+    calc(clamp(0, calc((var(--p-experience) - 0.42) / 0.04), 1) * -10px)
+  );
+}
+
+.experience__story[data-beat="story"] .lab,
+.experience__story[data-beat="plates"] .experience__words {
+  pointer-events: none;
+}
+
+.lab {
+  align-self: start;
+  margin-bottom: 26px;
+}
+
+.lab__label {
+  margin: 0 0 12px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  opacity: clamp(0, calc((var(--p-experience) - 0.44) / 0.03), 1);
+}
+
+/* An uneven contact sheet: the wide shots get the wide cells. */
+.lab__plates {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab__plate[data-plate="calibrate"] {
+  grid-column: span 4;
+}
+.lab__plate[data-plate="node"] {
+  grid-column: span 2;
+}
+.lab__plate[data-plate="gait"],
+.lab__plate[data-plate="yoga"] {
+  grid-column: span 3;
+}
+
+/* Each plate develops like a print in the tray: out of the dark, sharpening,
+   colour coming last. */
+.lab__plate {
+  --r: clamp(0, calc((var(--p-experience) - var(--at, 0)) / 0.05), 1);
+  opacity: var(--r);
+  transform: translateY(calc((1 - var(--r)) * 10px));
+}
+
+.lab__plate img {
+  filter: brightness(calc(0.3 + 0.7 * var(--r))) saturate(var(--r))
+    blur(calc((1 - var(--r)) * 3px));
+}
+
+.lab__open {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lab__frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: clamp(96px, 27vh, 210px);
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid var(--edge-hairline);
+  border-radius: 6px;
+  /* The cut-outs stand on the dark with a faint lab light behind them. */
+  background:
+    radial-gradient(
+      ellipse 70% 80% at 50% 62%,
+      rgba(111, 168, 199, 0.1),
+      transparent 72%
+    ),
+    rgba(8, 10, 11, 0.62);
+  transition:
+    border-color 220ms var(--ease-standard),
+    box-shadow 220ms var(--ease-standard);
+}
+
+.lab__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 420ms var(--ease-standard);
+}
+
+/* The application is a screen: it fills its frame, top first, and sits a
+   little dimmer than it was shot so the white UI does not outshine the
+   scene. */
+.lab__frame[data-screen="true"] {
+  padding: 0;
+}
+
+.lab__frame[data-screen="true"] img {
+  object-fit: cover;
+  object-position: 50% 0;
+  opacity: 0.9;
+}
+
+.lab__open:hover .lab__frame,
+.lab__open:focus-visible .lab__frame {
+  border-color: rgba(232, 132, 60, 0.45);
+  box-shadow:
+    0 0 0 1px var(--signal-wash),
+    0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.lab__open:hover .lab__frame img,
+.lab__open:focus-visible .lab__frame img {
+  transform: scale(1.04);
+}
+
+.lab__open:focus-visible {
+  outline: none;
+}
+
+.lab__name {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.lab__code {
+  color: var(--signal);
+}
+
+/* A quiet mark that the plate opens, lit on hover. */
+.lab__name::after {
+  content: "↗";
+  margin-left: auto;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+  transition:
+    opacity 200ms var(--ease-standard),
+    color 200ms var(--ease-standard);
+}
+
+.lab__open:hover .lab__name::after,
+.lab__open:focus-visible .lab__name::after {
+  opacity: 1;
+  color: var(--signal);
+}
+
+/* ── Phones: the same sheet, in the lower half's narrower box ──────────── */
+@media (max-width: 767px) {
+  .lab {
+    margin-bottom: 14px;
+  }
+
+  .lab__label {
+    margin-bottom: 8px;
+    font-size: 9px;
+  }
+
+  .lab__plates {
+    gap: 10px 8px;
+  }
+
+  .lab__frame {
+    height: clamp(72px, 13vh, 120px);
+    padding: 5px;
+  }
+
+  .lab__name {
+    gap: 6px;
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ── Reduced motion: both beats, one after the other ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .experience__story > * {
+    grid-area: auto;
+  }
+
+  .experience__story .experience__words,
+  .lab__label,
+  .lab__plate {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .lab__plate img {
+    filter: none;
+  }
+
+  .experience__story .lab {
+    pointer-events: auto;
+  }
+}

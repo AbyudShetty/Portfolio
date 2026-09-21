@@ -1,0 +1,193 @@
+/* ============================================================================
+   PlateViewer — one image, large, over the scene
+   ========================================================================= */
+
+.plate-view {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 56px);
+  pointer-events: none;
+}
+
+.plate-view__scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(5, 6, 7, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: plate-in 260ms var(--ease-standard) both;
+}
+
+.plate-view__panel {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  width: min(68rem, 100%);
+  pointer-events: auto;
+  outline: none;
+  animation: plate-rise 340ms var(--ease-standard) both;
+}
+
+.plate-view__figure {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+}
+
+.plate-view__frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  /* As tall as the window allows once the caption below has its room. */
+  height: min(calc(100vh - 200px), 48rem);
+  padding: clamp(16px, 3vw, 36px);
+  border: 1px solid var(--edge-hairline);
+  border-radius: 10px;
+  background:
+    radial-gradient(
+      ellipse 60% 70% at 50% 60%,
+      rgba(111, 168, 199, 0.12),
+      transparent 72%
+    ),
+    rgba(10, 11, 12, 0.94);
+  box-shadow: var(--shadow-lg);
+  animation: plate-in 280ms var(--ease-standard) both;
+}
+
+/* The screen needs no plate of its own: it is shown as itself, at its own
+   proportions, rounded like the display it was taken from. */
+.plate-view__frame[data-screen="true"] {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.plate-view__frame[data-screen="true"] img {
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+}
+
+.plate-view__frame img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.plate-view__caption {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 18px;
+  align-items: baseline;
+  max-width: 64ch;
+}
+
+.plate-view__code {
+  grid-row: span 2;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--signal);
+}
+
+.plate-view__title {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-size: 24px;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.plate-view__text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.plate-view__foot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.plate-view__controls {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.plate-view__step,
+.plate-view__close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--edge-soft);
+  border-radius: 999px;
+  background: rgba(10, 11, 12, 0.7);
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 160ms var(--ease-standard),
+    border-color 160ms var(--ease-standard);
+}
+
+.plate-view__step:hover,
+.plate-view__close:hover,
+.plate-view__step:focus-visible,
+.plate-view__close:focus-visible {
+  color: var(--text-primary);
+  border-color: rgba(232, 132, 60, 0.55);
+  outline: none;
+}
+
+@keyframes plate-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes plate-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+}
+
+@media (max-width: 767px) {
+  .plate-view__frame {
+    height: min(52vh, 28rem);
+  }
+
+  /* The controls above the words, where a thumb reaches them. */
+  .plate-view__foot {
+    flex-direction: column-reverse;
+    gap: 14px;
+  }
+
+  .plate-view__controls {
+    align-self: flex-end;
+  }
+
+  .plate-view__title {
+    font-size: 20px;
+  }
+
+  .plate-view__text {
+    font-size: 13px;
+  }
+}

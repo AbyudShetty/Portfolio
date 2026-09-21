@@ -45,6 +45,7 @@ import {
 } from "./projectMaterials";
 import { formatCoordinate, type Coordinate } from "./projectCoordinates";
 import { STATION } from "./specimen";
+import { PAIRED_STONE_SCALE, screenLayout } from "./screenLayout";
 import type { ProjectRecord } from "./ProjectData";
 
 const _worldPos = new THREE.Vector3();
@@ -471,8 +472,16 @@ void main() {`,
       // ── 4. Presentation. The station is recomputed in camera space every
       // frame rather than resolved once, so the stone stays framed if the
       // reader scrolls the camera on underneath it.
+      // A stone with a screen beside it steps left so the pair is centred
+      // (screenLayout.ts): pixels at the station's depth to world units.
+      const layout = screenLayout(record.id, frame.size.width, frame.size.height);
+      const perspective = camera as THREE.PerspectiveCamera;
+      const unitsPerPx =
+        (2 * STATION.distance * Math.tan(THREE.MathUtils.degToRad(perspective.fov) / 2)) /
+        Math.max(1, frame.size.height);
+      const shiftX = layout ? layout.shift * unitsPerPx : 0;
       _station
-        .set(STATION.offsetX, STATION.offsetY, -STATION.distance)
+        .set(STATION.offsetX - shiftX, STATION.offsetY, -STATION.distance)
         .applyQuaternion(camera.quaternion)
         .add(camera.position);
 
@@ -481,6 +490,7 @@ void main() {`,
       // across the narrower frame.
       const stationScale =
         STATION.scale *
+        (layout ? PAIRED_STONE_SCALE : 1) *
         (1 + 0.25 * portraitMix(frame.size.width / Math.max(1, frame.size.height)));
       const presentScale = fieldScale + (stationScale - fieldScale) * present;
       g.scale.setScalar(presentScale);
