@@ -1,4 +1,4 @@
-import { screensFor } from "./projectScreens";
+import { screensFor, windowAspect } from "./projectScreens";
 
 /**
  * screenLayout — the stone and its screen, composed as one pair.
@@ -25,7 +25,7 @@ const STONE_HALF_WIDTH = 0.4;
  * A stone sharing the frame is held a little smaller, so the pair clears the
  * step arrows and the section heading with room to spare.
  */
-export const PAIRED_STONE_SCALE = 0.9;
+export const PAIRED_STONE_SCALE = 0.85;
 /** Clear air between the stone and the screen, where the hairline runs. */
 const GAP = 96;
 /** Below this the screen would be a postage stamp. */
@@ -53,13 +53,11 @@ export function screenLayout(
   viewportWidth: number,
   viewportHeight: number,
 ): ScreenLayout | null {
-  const screen = screensFor(projectId)[0];
-  if (!screen) return null;
+  if (screensFor(projectId).length === 0) return null;
 
   const stoneHalf = viewportHeight * STONE_HALF_WIDTH * PAIRED_STONE_SCALE;
   const available = viewportWidth - 2 * sideInset(viewportWidth);
-  const byHeight =
-    (viewportHeight * MAX_HEIGHT - 40) * (screen.width / screen.height);
+  const byHeight = (viewportHeight * MAX_HEIGHT - 40) * windowAspect(projectId);
   const width = Math.min(MAX_WIDTH, byHeight, available - 2 * stoneHalf - GAP);
   if (width < MIN_WIDTH) return null;
 
