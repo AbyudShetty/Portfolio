@@ -42,11 +42,11 @@ export const ASTRONAUT_HOLD = { start: progressAt(384), end: progressAt(484) };
  * leaves, and the beat that sets up the exit.
  *
  * Held back until the Experience panel has turned from words to the lab
- * plates (ui/sections/lab-plates.css: the words are gone by 0.46 of the
- * section, 500vh). Drifting earlier carried the figure's arm under the left
+ * plates (ui/sections/lab-plates.css: the words are gone by 0.398 of the
+ * section, 483vh). Drifting earlier carried the figure's arm under the left
  * edge of the text while it was still being read.
  */
-export const ASTRONAUT_DRIFT = { start: progressAt(502), end: progressAt(548) };
+export const ASTRONAUT_DRIFT = { start: progressAt(496), end: progressAt(542) };
 
 /**
  * The figure leaves through the bottom-left of the frame while

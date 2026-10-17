@@ -5,9 +5,14 @@
 /*
   The words (with the signal path and the stack) and the plates share one box, stacked in a single grid cell, so
   the panel keeps its size and place while one gives way to the other. The
-  words leave over 0.42–0.46 of the section; the plates then develop one at
-  a time from 0.47 (each plate's --at), while the camera still holds the
-  astronaut. LabPlates.tsx sets data-beat so only the visible beat takes
+  Each beat is whole on screen for 61vh of scroll, the same as the other.
+  The panel is lit by 0.125 of the section; the words hold from there and
+  leave over 0.358–0.398; the plates develop from 0.393 (each plate's --at)
+  and are all complete by 0.492. The words spend their whole 61vh pinned.
+  The plates spend 41vh pinned and the rest while the panel drifts up with
+  the page after the sticky releases at 0.615 — still whole, still at full
+  opacity, until the sheet's top edge leaves the frame at 569vh, just before
+  the panel's own fade-out begins. LabPlates.tsx sets data-beat so only the visible beat takes
   clicks.
 */
 .experience__story {
@@ -23,9 +28,9 @@
 }
 
 .experience__story .experience__words {
-  opacity: calc(1 - clamp(0, calc((var(--p-experience) - 0.42) / 0.04), 1));
+  opacity: calc(1 - clamp(0, calc((var(--p-experience) - 0.358) / 0.04), 1));
   transform: translateY(
-    calc(clamp(0, calc((var(--p-experience) - 0.42) / 0.04), 1) * -10px)
+    calc(clamp(0, calc((var(--p-experience) - 0.358) / 0.04), 1) * -10px)
   );
 }
 
@@ -46,7 +51,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  opacity: clamp(0, calc((var(--p-experience) - 0.44) / 0.03), 1);
+  opacity: clamp(0, calc((var(--p-experience) - 0.378) / 0.03), 1);
 }
 
 /* An uneven contact sheet: the wide shots get the wide cells. */
@@ -73,7 +78,7 @@
 /* Each plate develops like a print in the tray: out of the dark, sharpening,
    colour coming last. */
 .lab__plate {
-  --r: clamp(0, calc((var(--p-experience) - var(--at, 0)) / 0.05), 1);
+  --r: clamp(0, calc((var(--p-experience) - var(--at, 0)) / 0.045), 1);
   opacity: var(--r);
   transform: translateY(calc((1 - var(--r)) * 10px));
 }

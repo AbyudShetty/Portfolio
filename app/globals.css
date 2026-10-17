@@ -383,10 +383,13 @@ body[data-custom-cursor="true"] * {
 
 .experience {
   justify-items: end;
-  /* In through the first quarter, out through the last, so the panel is
-     present exactly while the camera holds on the astronaut. */
+  /* In through the first eighth, out through the last quarter, so the panel
+     is present exactly while the camera holds on the astronaut. The arrival
+     is brisk on purpose: every hundredth it does not spend is reading time
+     for the two beats that follow, which get 61vh of scroll each
+     (ui/sections/lab-plates.css). */
   opacity: min(
-    calc(var(--p-experience) * 4),
+    calc(var(--p-experience) * 8),
     calc((1 - var(--p-experience)) * 4)
   );
 }

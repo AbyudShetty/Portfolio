@@ -22,7 +22,7 @@ import "./lab-plates.css";
  */
 
 /** Past this share of the section the plates own the panel (see the CSS). */
-const PLATES_FROM = 0.45;
+const PLATES_FROM = 0.4;
 
 type Staged = CSSProperties & { "--at"?: number };
 
@@ -61,7 +61,7 @@ export function LabPlates() {
             key={plate.id}
             className="lab__plate"
             data-plate={plate.id}
-            style={{ "--at": 0.47 + index * 0.028 } as Staged}
+            style={{ "--at": 0.393 + index * 0.018 } as Staged}
           >
             <button
               type="button"
