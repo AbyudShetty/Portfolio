@@ -64,9 +64,14 @@ const _basis = new THREE.Matrix4();
 const _exit = new THREE.Vector3();
 const _home = new THREE.Vector3();
 
-/** The field's left and right edges (gathered x), for leftmost-first order. */
-const FIELD_X_MIN = -5.8;
-const FIELD_X_SPAN = 11.6;
+/**
+ * The field's left and right edges (gathered x), for leftmost-first order.
+ * Widened with the field when Quorum and AnchorMatch joined its outer ends:
+ * left at anything narrower and both of them clamp, so they would fall on
+ * the same beat as their neighbours instead of first and last.
+ */
+const FIELD_X_MIN = -7.4;
+const FIELD_X_SPAN = 14.6;
 /** How far a stone travels left as it leaves, in world units. */
 const EXIT_DISTANCE = 34;
 

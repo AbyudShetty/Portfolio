@@ -228,6 +228,25 @@ export const PROJECTS: ProjectRecord[] = [
     year: "2026",
   },
 
+  {
+    id: "quorum",
+    name: "Quorum",
+    repo: "Quorum",
+    domain: "systems",
+    tier: "featured-1",
+    summary:
+      "A self-hosted workspace where AI coding agents from any vendor coordinate — messaging, waking each other and leasing files — while every consequential action waits for a human.",
+    points: [
+      "A workspace where AI coding agents from different vendors — Claude Code, Codex — work with each other instead of a person carrying messages between them.",
+      "Agents send mail, wake each other mid-task and lease files: across folders on one machine, or across two machines through a relay that cannot read what it passes on.",
+      "Built to be checked: mail from another agent is data and never instructions, and every event lands in a hash chain the CLI re-walks to prove nothing was edited.",
+      "A TypeScript monorepo — message schemas and an OpenAPI contract, a SQLite server, MCP and hook adapters, a CLI and a read-only web timeline.",
+    ],
+    stack: ["TypeScript", "Node.js", "SQLite", "MCP", "OpenAPI", "Vitest"],
+    status: [{ kind: "prototype", label: "PHASE 1 WORKING" }],
+    year: "2026",
+  },
+
   // ── TIER 2 — FEATURED, TECHNICAL ──────────────────────────────────────────
   {
     id: "msgrouter",
@@ -265,6 +284,25 @@ export const PROJECTS: ProjectRecord[] = [
     ],
     stack: ["Python", "Claude Haiku 4.5", "Claude Sonnet 5", "103 tests"],
     status: [],
+    year: "2026",
+  },
+
+  {
+    id: "anchormatch",
+    name: "AnchorMatch",
+    repo: "AnchorMatch-Amazon-ML-Challenge-2026",
+    domain: "ai",
+    tier: "featured-2",
+    summary:
+      "Amazon ML Challenge 2026: matching messy business records to the real company behind them, across the US, India and a France that appears only at test time.",
+    points: [
+      "Amazon ML Challenge 2026: match business records — names and addresses, in three countries — to the one canonical company each belongs to.",
+      "Retrieval cuts the search from 21.85M candidate pairs to 2.2 per record and still keeps 98.9% of the true matches.",
+      "A two-stage LightGBM matcher scores what survives, cross-encoders re-read only the uncertain band, and a stacker trained on held-out folds decides.",
+      "France was in the test set alone, so the models were adapted to it using their own confident predictions: 0.9883 macro F0.5, around 221st.",
+    ],
+    stack: ["Python", "LightGBM", "PyTorch", "Transformers", "scikit-learn"],
+    status: [{ kind: "team", label: "TEAM PROJECT" }],
     year: "2026",
   },
 

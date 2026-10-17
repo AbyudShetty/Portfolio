@@ -172,6 +172,27 @@ export const COORDINATES: Record<string, Coordinate> = {
     portrait: [0, 0.2, -37],
   },
 
+  // ── The two newcomers ───────────────────────────────────────────────────
+  // Quorum ends the second row on the left, AnchorMatch the third on the
+  // right, so the bunch grows outward in both directions and its centre of
+  // mass stays on FIELD_CENTER. Solved against the six shots the settled
+  // field is seen in: neither comes closer to a frame edge than the field
+  // already did (118px, splats at 960vh), no label pair is tighter than the
+  // existing 72px, and the tightest stone pair is unchanged at 2.99 units.
+  // Portrait gives them a staggered row of their own behind the last.
+  quorum: {
+    code: "SYS-03",
+    scattered: [-28, 5.2, -43],
+    gathered: [-7.4, 0.07, -24.5],
+    portrait: [-1.85, 0.12, -40.3],
+  },
+  anchormatch: {
+    code: "AI-05",
+    scattered: [29, -6.5, -34],
+    gathered: [7.2, -0.1, -27],
+    portrait: [1.85, -0.08, -40.2],
+  },
+
   // ── The toolkit (1) ─────────────────────────────────────────────────────
   // A step in front of the front row on the right: bottom-right of frame in
   // every field shot, close enough to belong to the bunch, apart enough to
