@@ -141,7 +141,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "Gaussian Splat Viewer",
     repo: "3D-Visualization-of-Gaussian-Splats",
     domain: "xr",
-    tier: "featured-1",
+    tier: "featured-2",
     summary:
       "Browser-based first-person viewer for Gaussian Splat captures of real campus locations. Pointer-lock navigation, configurable bounds, zero install.",
     points: [
@@ -160,7 +160,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "Astronaut Digital Twin",
     repo: "Astronaut_health_digital_twin",
     domain: "simulation",
-    tier: "featured-1",
+    tier: "featured-2",
     summary:
       "Couples the Borbely sleep model to the Oman vestibular model through sleep-pressure-gated adaptation, then quantifies the excess mission risk that coupling produces.",
     points: [
@@ -196,7 +196,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "CardioTriage",
     repo: "CardioTriage",
     domain: "simulation",
-    tier: "featured-1",
+    tier: "featured-2",
     summary:
       "Mass-casualty triage under time pressure, with every vital sign computed by the BioGears physiology engine rather than faked from a lookup table.",
     points: [
@@ -214,7 +214,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "KiranaAI",
     repo: "KiranaAI",
     domain: "ai",
-    tier: "featured-1",
+    tier: "featured-2",
     summary:
       "Voice and WhatsApp orders from Indian grocery stores turned into structured operations: multilingual ingestion, fuzzy SKU matching, a credit ledger and demand forecasting.",
     points: [
@@ -273,7 +273,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "Buy or Wait?",
     repo: "affordability-forecast-agent",
     domain: "ai",
-    tier: "featured-2",
+    tier: "featured-1",
     summary:
       "An affordability agent that rebuilds a user's finances from transactions, messages and scanned documents, forecasts 90 days ahead and picks a safe way to pay.",
     points: [
@@ -292,7 +292,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "AnchorMatch",
     repo: "AnchorMatch-Amazon-ML-Challenge-2026",
     domain: "ai",
-    tier: "featured-2",
+    tier: "featured-1",
     summary:
       "Amazon ML Challenge 2026: matching messy business records to the real company behind them, across the US, India and a France that appears only at test time.",
     points: [
@@ -351,7 +351,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "VRATA",
     repo: "VRATA",
     domain: "research",
-    tier: "secondary",
+    tier: "featured-2",
     summary:
       "Fleet-wide Weibull reliability estimated across mutually distrusting wind-farm operators using malicious-secure multi-party computation.",
     points: [
@@ -430,7 +430,7 @@ export const PROJECTS: ProjectRecord[] = [
     id: "dlcert",
     name: "Deep Learning",
     domain: "certification",
-    tier: "featured-2",
+    tier: "secondary",
     org: "NPTEL · IIT Ropar",
     summary:
       "NPTEL certification, Elite: a 12-week IIT Ropar course by Prof. Sudarshan Iyengar and Prof. Mitesh Khapra (IIT Madras), Jul–Oct 2025.",
@@ -452,7 +452,7 @@ export const PROJECTS: ProjectRecord[] = [
     name: "Introduction to Large Language Models",
     shortName: "Intro to LLMs",
     domain: "certification",
-    tier: "featured-2",
+    tier: "secondary",
     org: "NPTEL · IIT Delhi & IIT Bombay",
     summary:
       "NPTEL certification: a 12-week course by Prof. Tanmoy Chakraborty (IIT Delhi) and Prof. Soumen Chakrabarti (IIT Bombay), Jul–Oct 2025.",
@@ -478,7 +478,7 @@ export const PROJECTS: ProjectRecord[] = [
     id: "toolkit",
     name: "Toolkit",
     domain: "toolkit",
-    tier: "featured-2",
+    tier: "secondary",
     summary:
       "What the work in this field is built with: languages, backend, AI/ML, 3D, systems, and how it is tested and shipped.",
     points: [

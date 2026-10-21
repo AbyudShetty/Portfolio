@@ -53,11 +53,14 @@ export interface TierSpring {
 
 export interface TierProfile {
   /**
-   * Projects sit within a few percent of each other on purpose. Size is no
-   * longer a hierarchy signal — the field has to read as one family of
-   * specimens, so rank is carried by depth, clarity, placement, labels and
-   * interaction instead. Only the Experience anchor, which is not a pebble,
-   * stands apart in scale.
+   * Projects sit within a few percent of each other on purpose: the field has
+   * to read as one family of specimens, so rank is carried first by depth and
+   * placement — the front row sits ~40% larger on screen than the back row
+   * through perspective alone, which no honest scale difference could match.
+   * Scale only reinforces that: the four in front are held a little heavier,
+   * and nothing is ever shrunk to mark it down, because a stone made smaller
+   * than its neighbours reads as further away rather than lesser. Only the
+   * Experience anchor, which is not a pebble, stands apart in scale.
    */
   scale: number;
   material: TierMaterial;
@@ -95,7 +98,7 @@ export const TIER_PROFILE: Record<Tier, TierProfile> = {
     labelRestOpacity: 0,
   },
   "featured-1": {
-    scale: 1.0,
+    scale: 1.35,
     material: {
       transmission: 0.66,
       roughness: 0.12,
@@ -114,7 +117,7 @@ export const TIER_PROFILE: Record<Tier, TierProfile> = {
     labelRestOpacity: 0,
   },
   "featured-2": {
-    scale: 0.96,
+    scale: 1.0,
     material: {
       transmission: 0.66,
       roughness: 0.12,
@@ -133,7 +136,7 @@ export const TIER_PROFILE: Record<Tier, TierProfile> = {
     labelRestOpacity: 0,
   },
   secondary: {
-    scale: 0.9,
+    scale: 0.78,
     material: {
       transmission: 0.66,
       roughness: 0.12,
