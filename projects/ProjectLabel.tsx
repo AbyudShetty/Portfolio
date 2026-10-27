@@ -1,7 +1,7 @@
 "use client";
 
 import { Html } from "@react-three/drei";
-import { DOMAIN_ACCENT, DOMAIN_LABEL } from "@/lib/design-tokens";
+import { DOMAIN_ACCENT } from "@/lib/design-tokens";
 import type { Domain } from "./ProjectData";
 
 export type LabelState = "ambient" | "proximity" | "hover" | "dimmed";
@@ -11,7 +11,7 @@ export type LabelState = "ambient" | "proximity" | "hover" | "dimmed";
  *
  * The field is an inspection interface, not a puzzle: a reader must be able to
  * see what every stone is without hovering each one to find out. So the name
- * and its domain are present at rest, and hover raises prominence rather than
+ * and its code are present at rest, and hover raises prominence rather than
  * supplying the information for the first time.
  *
  * Nothing here is ever blurred. No filter, no depth-of-field, no softening at
@@ -61,7 +61,6 @@ export function ProjectLabel({
         />
         <span className="pebble-label__name">{name}</span>
         <span className="pebble-label__meta">
-          {DOMAIN_LABEL[domain]}
           <span className="pebble-label__code">{code}</span>
         </span>
       </div>

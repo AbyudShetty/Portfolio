@@ -1,0 +1,279 @@
+/* ============================================================================
+   Field layout mode — development instruments, never shipped
+   ========================================================================= */
+
+.fed {
+  position: fixed;
+  top: 64px;
+  left: 16px;
+  z-index: 60;
+  width: 300px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  background: rgba(8, 10, 11, 0.92);
+  border: 1px solid var(--edge-soft);
+  border-radius: 10px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  pointer-events: auto;
+}
+
+.fed[data-hidden="true"] {
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.fed[data-hidden="true"]:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fed__head {
+  display: grid;
+  gap: 2px;
+}
+
+.fed__title {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.fed__sub {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ── Which shot the camera is parked on ─────────────────────────────────── */
+
+.fed__shots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.fed__shot,
+.fed__actions button,
+.fed__report header button {
+  padding: 6px 8px;
+  border: 1px solid var(--edge-hairline);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.fed__shot[aria-current="true"] {
+  border-color: var(--signal);
+  color: var(--text-primary);
+}
+
+.fed__shot:hover,
+.fed__actions button:hover:not(:disabled) {
+  border-color: var(--edge-active);
+  color: var(--text-primary);
+}
+
+.fed__actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── The four rules, live ───────────────────────────────────────────────── */
+
+.fed__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin: 0;
+}
+
+.fed__stats > div {
+  padding: 6px 4px;
+  border: 1px solid var(--edge-hairline);
+  border-radius: 5px;
+  text-align: center;
+}
+
+.fed__stats > div[data-bad="true"] {
+  border-color: #c2483c;
+  background: rgba(194, 72, 60, 0.12);
+}
+
+.fed__stats dt {
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.fed__stats dd {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+/* ── What is in hand ────────────────────────────────────────────────────── */
+
+.fed__stone h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.fed__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+}
+
+.fed__stone-actions {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 8px;
+}
+
+.fed__stone-actions button {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--edge-hairline);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.fed__stone-actions button:hover {
+  border-color: var(--edge-active);
+  color: var(--text-primary);
+}
+
+.fed__hint {
+  margin: 0;
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: var(--text-tertiary);
+}
+
+.fed__hint--idle {
+  padding: 10px 0;
+}
+
+.fed__actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.fed__saved {
+  margin: 0;
+  font-size: 9.5px;
+  color: var(--signal);
+}
+
+.fed__spacing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fed__spacing input {
+  width: 80px;
+  padding: 6px 8px;
+  border: 1px solid var(--edge-soft);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.fed__spacing input:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* ── The full check ─────────────────────────────────────────────────────── */
+
+.fed__report {
+  border: 1px solid var(--edge-hairline);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.fed__report header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.fed__report ul {
+  margin: 0;
+  padding-left: 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.fed__report li {
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.fed__report li[data-kind="gap"],
+.fed__report li[data-kind="frame"] {
+  color: #e08b82;
+}
+
+.fed__report li[data-kind="order"] {
+  color: #d8b36a;
+}
+
+.fed__order summary {
+  cursor: pointer;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.fed__order ol {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  counter-reset: stone;
+}
+
+.fed__order li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+}
+
+.fed__order li::before {
+  counter-increment: stone;
+  content: counter(stone) ".";
+  width: 20px;
+  color: var(--text-tertiary);
+}

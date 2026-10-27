@@ -10,6 +10,7 @@ import {
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
 import { useMounted } from "@/hooks/useViewport";
+import { fieldEditor, parkAt, publishEditor } from "@/projects/fieldEditor";
 import { useReliveAtEnd } from "@/ui/relive";
 import { Console, type ConsoleMode } from "@/ui/Console";
 import { FieldFallback } from "@/ui/FieldFallback";
@@ -41,6 +42,52 @@ const SpaceScene = dynamic(
   { ssr: false },
 );
 
+/**
+ * The field's layout mode — development only, opened with `?edit`.
+ *
+ * Loaded lazily and behind a NODE_ENV check, so neither the panel nor the
+ * rig it mounts can reach a production bundle (ui/FieldEditorPanel).
+ */
+const FieldEditorPanel = dynamic(
+  () => import("@/ui/FieldEditorPanel").then((m) => m.FieldEditorPanel),
+  { ssr: false },
+);
+
+function useLayoutMode(mounted: boolean): boolean {
+  const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    if (!mounted || process.env.NODE_ENV !== "development") return;
+    if (!new URLSearchParams(window.location.search).has("edit")) return;
+
+    let cancelled = false;
+    void import("@/ui/FieldEditorPanel").then(({ seedLayout }) => {
+      if (cancelled) return;
+      // Whichever arrangement this screen shape shows is the one being edited.
+      const portrait = window.innerWidth / window.innerHeight < 1.1;
+      seedLayout(portrait ? "portrait" : "landscape");
+      fieldEditor.active = true;
+      setEditing(true);
+      // Park the document as well as the camera, so the landing's name and
+      // links are behind us rather than lying over the field.
+      parkAt(960);
+    });
+    // Scrolling would carry the overlays off the shot being composed, so the
+    // page is held still by refusing the gesture rather than by hiding the
+    // overflow — which would also stop parkAt() from working.
+    const hold = (e: Event) => e.preventDefault();
+    window.addEventListener("wheel", hold, { passive: false });
+    window.addEventListener("touchmove", hold, { passive: false });
+    return () => {
+      cancelled = true;
+      fieldEditor.active = false;
+      publishEditor();
+      window.removeEventListener("wheel", hold);
+      window.removeEventListener("touchmove", hold);
+    };
+  }, [mounted]);
+  return editing;
+}
+
 export default function Page() {
   const mounted = useMounted();
   const reducedMotion = useReducedMotion();
@@ -53,6 +100,7 @@ export default function Page() {
   // The bottom of the page is a room of the tesseract; arriving there
   // returns the reader to the beginning.
   useReliveAtEnd(mounted);
+  const editing = useLayoutMode(mounted);
 
   useEffect(() => {
     setCapable(detectWebGLSupport() && !prefersSaveData());
@@ -99,6 +147,8 @@ export default function Page() {
       <SpecimenPanel reducedMotion={reducedMotion} />
 
       <Console mode={consoleMode} onClose={closeConsole} />
+
+      {editing ? <FieldEditorPanel /> : null}
 
       <InstrumentCursor />
       <div className="grain" aria-hidden="true" />

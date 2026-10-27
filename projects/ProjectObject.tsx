@@ -45,6 +45,8 @@ import {
 } from "./projectMaterials";
 import { formatCoordinate, type Coordinate } from "./projectCoordinates";
 import { STATION } from "./specimen";
+import { stoneScale, stoneSpin } from "./projectStanding";
+import { fieldEditor } from "./fieldEditor";
 import { PAIRED_STONE_SCALE, screenLayout } from "./screenLayout";
 import type { ProjectRecord } from "./ProjectData";
 
@@ -56,6 +58,9 @@ const _station = new THREE.Vector3();
 const _axis = new THREE.Vector3();
 const _face = new THREE.Quaternion();
 const _identity = new THREE.Quaternion();
+/** The stone's own turn in the field, which the layout mode sets. */
+const _spin = new THREE.Quaternion();
+const _spinAxis = new THREE.Vector3(0, 1, 0);
 const _centre = new THREE.Vector3();
 const _camUp = new THREE.Vector3();
 const _right = new THREE.Vector3();
@@ -70,8 +75,8 @@ const _home = new THREE.Vector3();
  * left at anything narrower and both of them clamp, so they would fall on
  * the same beat as their neighbours instead of first and last.
  */
-const FIELD_X_MIN = -7.4;
-const FIELD_X_SPAN = 14.6;
+const FIELD_X_MIN = -6.33;
+const FIELD_X_SPAN = 11.98;
 /** How far a stone travels left as it leaves, in world units. */
 const EXIT_DISTANCE = 34;
 
@@ -325,7 +330,7 @@ void main() {`,
 
     // ── 1. Emergence. Absent from the hero entirely: the title is a
     // protected zone, and an invisible object is the only guarantee.
-    const reveal = reducedMotion
+    const reveal = reducedMotion || fieldEditor.active
       ? 1
       : record.arrivesWithField
         ? lateRevealFactor(progress)
@@ -337,9 +342,10 @@ void main() {`,
     if (!g.visible) g.visible = true;
 
     // ── 2. Convergence. Scattered environment → settled puddle.
-    const converge = reducedMotion
-      ? 1
-      : convergeFactor(progress, convergeStagger);
+    const converge =
+      reducedMotion || fieldEditor.active
+        ? 1
+        : convergeFactor(progress, convergeStagger);
 
     // Names arrive with the field, once the stones are most of the way home.
     const shouldLabel = converge > 0.55;
@@ -355,9 +361,12 @@ void main() {`,
     const gth0 = land[0] + (tall[0] - land[0]) * portrait;
     const gth1 = land[1] + (tall[1] - land[1]) * portrait;
     const gth2 = land[2] + (tall[2] - land[2]) * portrait;
-    const baseX = s[0] + (gth0 - s[0]) * converge;
+    const edit = fieldEditor.active ? fieldEditor.layout[record.id] : undefined;
+    const homeX = edit ? edit.x : gth0;
+    const homeZ = edit ? edit.z : gth2;
+    const baseX = s[0] + (homeX - s[0]) * converge;
     const baseY = s[1] + (gth1 - s[1]) * converge;
-    const baseZ = s[2] + (gth2 - s[2]) * converge;
+    const baseZ = s[2] + (homeZ - s[2]) * converge;
 
     // Arrival: the specimen travels in from further out along its own
     // sight-line rather than fading up in place.
@@ -459,7 +468,7 @@ void main() {`,
 
     const arrivalScale = easeOutCubic(reveal);
     const unlayeredScale =
-      profile.scale *
+      (edit ? edit.scale : stoneScale(record.id)) *
       arrivalScale *
       (1 + springs.approach.value * (APPROACH.scale - 1));
     // While the Endurance is present, a stone in its way is slid back along
@@ -512,7 +521,8 @@ void main() {`,
       _up.crossVectors(_axis, _right);
       _basis.makeBasis(_right, _up, _axis).multiply(faceFrame.toFrame);
       _face.setFromRotationMatrix(_basis);
-      g.quaternion.slerpQuaternions(_identity, _face, present);
+      _spin.setFromAxisAngle(_spinAxis, edit ? edit.spin : stoneSpin(record.id));
+      g.quaternion.slerpQuaternions(_spin, _face, present);
 
       // Put the stone's *silhouette* on the station rather than its origin,
       // so every project is framed identically behind a panel that never
@@ -526,7 +536,9 @@ void main() {`,
     } else {
       g.position.copy(_field);
       g.scale.setScalar(fieldScale);
-      if (g.quaternion.w !== 1) g.quaternion.identity();
+      const turn = edit ? edit.spin : stoneSpin(record.id);
+      if (turn !== 0) g.quaternion.setFromAxisAngle(_spinAxis, turn);
+      else if (g.quaternion.w !== 1) g.quaternion.identity();
     }
 
     // ── 5. The ending. The stones leave to the left, leftmost first, then
@@ -641,6 +653,10 @@ void main() {`,
         }}
         onPointerMove={(e) => setOverLink(linkUnder(e) !== null)}
         onClick={(e) => {
+          if (fieldEditor.active) {
+            e.stopPropagation();
+            return;   // the layout mode owns the pointer (FieldEditorRig)
+          }
           if (!interactive) return;
           e.stopPropagation();
           const link = linkUnder(e);
@@ -697,7 +713,7 @@ void main() {`,
           name={record.shortName ?? record.name}
           domain={record.domain}
           state={labelState}
-          offsetY={profile.scale * 0.95 + 0.34}
+          offsetY={(fieldEditor.layout[record.id]?.scale ?? stoneScale(record.id)) * 0.95 + 0.34}
           reducedMotion={reducedMotion}
         />
       ) : null}

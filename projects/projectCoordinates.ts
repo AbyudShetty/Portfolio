@@ -42,28 +42,50 @@ export interface Coordinate {
 export const FIELD_CENTER: [number, number, number] = [0, 0, -25.6];
 
 /**
- * The puddle is a fixed set of eighteen places, and a project occupies the
- * place its standing earns.
+ * The puddle: a cluster that reads from its middle outwards.
  *
- * The places themselves were solved as geometry and have not moved since:
- * staggered rows, centred on FIELD_CENTER, every stone at least 2.99 units
- * from its neighbours and no label pair closer than 72px in any of the six
- * shots the settled field is seen in. Unevenly set, so it never reads as a
- * grid.
+ * The four stones the work is judged on lie at the heart, the next six ring
+ * them, and the last eight — the supporting work, the certificates and the
+ * toolkit — lie around the rim.
  *
- * What changed is who stands where. Depth is the field's real hierarchy:
- * under the inspection camera the front row is about 40% larger on screen
- * than the back row, five times the difference any honest change of scale
- * could carry (projects/projectMaterials.ts). So the four the work is judged
- * on take the front row, the solid middle takes the next band, and the
- * supporting work, the certificates and the toolkit take the back — with the
- * far band keeping the most generous pointer radius of all, because rank
- * governs presentation and never discoverability (§7.5).
+ * The rings were drawn where they are seen. Laying them out as circles on
+ * the ground gave a ragged outline, because the camera looks down at an
+ * angle and a circle on the ground projects as a lopsided egg. So each ring
+ * is instead an even ellipse *on screen*, dropped back onto the ground
+ * plane through the inspection camera, and each stone is spaced around it by
+ * how large it is drawn rather than by angle. Measured on the result, the
+ * outside edge of the cluster varies by 3px over a 340px radius: a clean
+ * oval, not a heap.
  *
- * Re-ranking a project is therefore a matter of swapping two entries below,
- * not re-solving the field.
+ * Size carries standing, one size per project and no two alike
+ * (projects/projectStanding.ts), and is spent on *apparent* size: the field
+ * is deep enough that perspective alone changes how big a stone looks by
+ * half, so a stone lying further from the lens is built physically larger to
+ * read the same. What is left on screen is a clean run from the best work to
+ * the least, falling away from the centre of the cluster.
+ *
+ * Verified together, against the six shots the settled field is seen in: no
+ * two pebbles closer than 0.29 units edge to edge, no label pair closer than
+ * 84px, and nothing within 43px of the frame. Portrait keeps rings of its
+ * own, solved against its upright proportions, where the screen is too
+ * narrow for this ellipse to fit.
+ *
+ * Re-ranking a project means moving one line in projectStanding.ts; which
+ * ring it then lies in follows from its place in that list.
  */
 export const COORDINATES: Record<string, Coordinate> = {
+  tyretrace: {
+    code: "RES-02",
+    scattered: [-31, 6.5, -39],
+    gathered: [-2.79, 0.05, -27.18],
+    portrait: [-2.8, 0.05, -19.7],
+  },
+  ghostaudit: {
+    code: "SYS-04",
+    scattered: [31, -3.5, -48],
+    gathered: [2.55, 0.05, -24.48],
+    portrait: [2.5, 0.05, -35.3],
+  },
   // The Experience is not a specimen. It has one position and never moves.
   slimevr: {
     code: "EXP-00",
@@ -72,125 +94,119 @@ export const COORDINATES: Record<string, Coordinate> = {
     portrait: [-2.2, 0.15, 0],
   },
 
-  // ── The front row: the four the work is judged on ───────────────────────
-  // Nearest the inspection camera, so perspective holds them largest in
-  // frame — about 40% larger on screen than the back row before scale is
-  // counted at all. Systems and AI/ML alternate across the row rather than
-  // pairing up.
+  // Listed in order of standing: the first four are the heart of the
+  // cluster, the next six its middle ring, the last eight its rim.
   quorum: {
     code: "SYS-03",
     scattered: [-28, 5.2, -43],
-    gathered: [-5.75, 0.16, -21.39],
-    portrait: [-3.6, 0.35, -19.8],
+    gathered: [-0.11, 0.05, -26.14],
+    portrait: [-0.73, -0.05, -30.38],
   },
   anchormatch: {
     code: "AI-05",
     scattered: [29, -6.5, -34],
-    gathered: [-2.42, -0.08, -21.57],
-    portrait: [0.1, 0.5, -20.1],
+    gathered: [2.78, 0.05, -26.96],
+    portrait: [1.09, 0.19, -28.41],
   },
   aegis: {
     code: "SYS-01",
     scattered: [18.5, 2.4, -33],
-    gathered: [0.92, 0.11, -21.85],
-    portrait: [3.6, 0.3, -19.7],
+    gathered: [-2.39, 0.05, -24.27],
+    portrait: [0.51, -0.02, -24.26],
   },
   affordability: {
     code: "AI-04",
     scattered: [-2.5, 8.8, -37],
-    gathered: [3.99, -0.11, -21.46],
-    portrait: [-1.8, 0.15, -23.2],
+    gathered: [1.03, 0.05, -29.5],
+    portrait: [-1.03, 0.25, -26.55],
   },
-
-  // ── The middle band ─────────────────────────────────────────────────────
   splats: {
     code: "XR-01",
     scattered: [-16.5, 4.2, -30],
-    gathered: [-4.12, -0.04, -24.29],
-    portrait: [1.9, 0.2, -23.4],
+    gathered: [3.78, 0.05, -22.25],
+    portrait: [1.69, 0.21, -31.83],
   },
   astronaut: {
     code: "SIM-01",
     scattered: [-9, 6.5, -44],
-    gathered: [-0.75, -0.13, -24.28],
-    portrait: [-3.7, 0.5, -26.5],
+    gathered: [5.25, 0.05, -28],
+    portrait: [2.45, -0.11, -26.15],
   },
   cardiotriage: {
     code: "SIM-02",
     scattered: [7.5, 5.6, -21],
-    gathered: [-7.4, 0.07, -24.5],
-    portrait: [3.6, 0.2, -26.4],
+    gathered: [4.9, 0.05, -25.75],
+    portrait: [0.77, 0.04, -21.3],
   },
   kirana: {
     code: "AI-01",
     scattered: [-20, -3.5, -25],
-    gathered: [2.88, -0.27, -24.26],
-    portrait: [0, 0.3, -26.8],
+    gathered: [-4.67, 0.05, -25.48],
+    portrait: [-1.53, 0.08, -22.66],
   },
   msgrouter: {
     code: "AI-02",
     scattered: [12, -5.2, -38],
-    gathered: [-2.52, 0.01, -26.99],
-    portrait: [1.8, 0.1, -29.9],
+    gathered: [-1.29, 0.05, -29.46],
+    portrait: [-2.49, -0.05, -28.6],
   },
   vrata: {
     code: "RES-01",
     scattered: [-24, 1.8, -47],
-    gathered: [-5.59, 0.03, -26.93],
-    portrait: [-1.9, -0.1, -30.1],
+    gathered: [5.08, 0.05, -23.62],
+    portrait: [-0.21, 0.12, -34.07],
   },
 
-  // ── The back band: supporting work, the certificates and the toolkit ────
-  // Nothing here is hidden — every stone keeps the same generous pointer
-  // radius and opens to the same lens (§7.5: hierarchy governs
+  // Nothing is hidden by being small: every stone keeps the same generous
+  // pointer radius and opens to the same lens (§7.5 — standing governs
   // presentation, never discoverability).
   ipl: {
     code: "PRD-01",
     scattered: [4, -7.5, -50],
-    gathered: [5.6, -0.18, -24.25],
-    portrait: [0, 0.15, -33.5],
+    gathered: [0.1, 0.05, -23.39],
+    portrait: [-2.41, 0.14, -35.1],
   },
   miniraft: {
     code: "SYS-02",
     scattered: [22, 5.5, -27],
-    gathered: [0.83, -0.14, -27.06],
-    portrait: [-3.6, 0, -33.2],
+    gathered: [-3.98, 0.05, -23.07],
+    portrait: [-3.28, 0.11, -31.37],
   },
   medivault: {
     code: "AI-03",
     scattered: [-13, -6.2, -34],
-    gathered: [3.68, -0.15, -26.99],
-    portrait: [3.7, -0.15, -33.1],
+    gathered: [-3.6, 0.05, -29.61],
+    portrait: [0.31, 0.17, -37.86],
   },
   realitycompiler: {
     code: "PRD-02",
     scattered: [16, 7.2, -46],
-    gathered: [-4.09, 0.2, -29.65],
-    portrait: [3.5, 0.3, -36.6],
+    gathered: [3.55, 0.05, -29.65],
+    portrait: [3.44, -0.06, -29.91],
   },
   hcrm: {
     code: "PRD-03",
     scattered: [25, -2.6, -40],
-    gathered: [-0.78, 0.24, -29.79],
-    portrait: [-3.5, 0.25, -36.7],
+    gathered: [-4.96, 0.05, -27.88],
+    portrait: [3.33, -0.09, -23.97],
   },
   dlcert: {
     code: "CRT-01",
     scattered: [27, 3.5, -36],
-    gathered: [7.2, -0.1, -27],
-    portrait: [0, 0.2, -37],
+    gathered: [-1.85, 0.05, -22.1],
+    portrait: [2.31, 0.09, -19.63],
   },
   llmcert: {
     code: "CRT-02",
     scattered: [24, -4.5, -45],
-    gathered: [2.33, -0.05, -29.65],
-    portrait: [-1.85, 0.12, -40.3],
+    gathered: [0.12, 0.05, -21.39],
+    portrait: [-1.23, -0.09, -17.75],
   },
   toolkit: {
     code: "KIT-00",
     scattered: [21, -7, -30],
-    gathered: [5.77, -0.19, -29.64],
-    portrait: [1.85, -0.08, -40.2],
+    gathered: [1.93, 0.05, -21.87],
+    portrait: [-3.28, 0.06, -23.61],
   },
 };
 

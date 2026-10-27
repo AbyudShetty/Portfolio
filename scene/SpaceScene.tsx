@@ -1,7 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import { Canvas, advance } from "@react-three/fiber";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
 
 import { ENVIRONMENT, SPACE } from "@/lib/design-tokens";
@@ -13,6 +15,7 @@ import {
 import { PerformanceProvider } from "@/hooks/usePerformanceTier";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { scroll } from "@/hooks/useScrollProgress";
+import { fieldEditor, subscribeEditor } from "@/projects/fieldEditor";
 import { ExperienceComposition } from "@/experience/ExperienceComposition";
 import { EnduranceSequence } from "@/experience/EnduranceSequence";
 import { BlackHole } from "@/experience/BlackHole";
@@ -57,6 +60,11 @@ function convergeStaggerFor(id: string, maxDistance: number): number {
 }
 
 function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
+  const editing = useSyncExternalStore(
+    subscribeEditor,
+    () => fieldEditor.active,
+    () => false,
+  );
   const maxScatter = useMemo(
     () =>
       Math.max(
@@ -125,6 +133,9 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
       <Lighting />
       <ScrollCameraRig reducedMotion={reducedMotion} />
 
+      {/* Hands for the layout mode, when it is open (development only). */}
+      {editing ? <FieldEditorRig /> : null}
+
       <ExperienceComposition reducedMotion={reducedMotion} />
 
       {/* The Endurance, and the cable that stays attached after it has gone. */}
@@ -165,6 +176,16 @@ function SceneContents({ reducedMotion }: { reducedMotion: boolean }) {
  * in the DOM carry the actual content — the scene is the view through the
  * window, not the record.
  */
+/**
+ * The layout mode's rig, mounted only while that mode is open and only in
+ * development (scene/FieldEditorRig). It is loaded lazily so none of it
+ * reaches a production bundle.
+ */
+const FieldEditorRig = dynamic(
+  () => import("./FieldEditorRig").then((m) => m.FieldEditorRig),
+  { ssr: false },
+);
+
 export function SpaceScene() {
   const reducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(true);

@@ -106,6 +106,42 @@ export interface ProjectRecord {
 }
 
 export const PROJECTS: ProjectRecord[] = [
+  {
+    id: "tyretrace",
+    name: "TyreTrace",
+    repo: "TyreTrace",
+    domain: "research",
+    tier: "featured-1",
+    summary:
+      "Bayesian tyre-degradation research using public F1 timing, time-aware model comparisons, uncertainty diagnostics and a browser-based practice planner.",
+    points: [
+      "Studies tyre degradation from public F1 timing, using a shared lap schema for real data and a synthetic twin.",
+      "Compares mixed-effects and Bayesian models with conventional and machine-learning baselines across race weekends.",
+      "Tests uncertainty on later weekends; results remain conditional, with no claim of live race prediction or observed fuel truth.",
+      "A React dashboard explores saved results, while an information-gain planner helps choose informative practice runs.",
+    ],
+    stack: ["Python", "NumPyro", "JAX", "Polars", "FastF1", "React", "TypeScript"],
+    status: [{ kind: "research", label: "RESEARCH PROJECT" }],
+    year: "2026",
+  },
+  {
+    id: "ghostaudit",
+    name: "GhostAudit",
+    repo: "GhostAudit",
+    domain: "systems",
+    tier: "featured-2",
+    summary:
+      "Evidence-backed deletion audits that link historical identities, reconstruct resource state and produce cited findings with ordered remediation plans.",
+    points: [
+      "Checks deletion requests across database snapshots, logs, support records, exports, search indexes and backups.",
+      "Links historical identities and reconstructs resource state at an audit cutoff before applying category-specific policies.",
+      "Produces cited findings and dependency-ordered remediation and verification steps; it does not delete live data.",
+      "Runs on Python and pdfplumber with no runtime model or network calls; validates the plan before publishing it atomically.",
+    ],
+    stack: ["Python", "SQL snapshots", "pdfplumber", "unittest"],
+    status: [{ kind: "prototype", label: "AUDIT PROTOTYPE" }],
+    year: "2026",
+  },
   // ── EXPERIENCE ────────────────────────────────────────────────────────────
   // Structurally distinct. Never rendered as a project object.
   {

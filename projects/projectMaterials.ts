@@ -53,14 +53,9 @@ export interface TierSpring {
 
 export interface TierProfile {
   /**
-   * Projects sit within a few percent of each other on purpose: the field has
-   * to read as one family of specimens, so rank is carried first by depth and
-   * placement — the front row sits ~40% larger on screen than the back row
-   * through perspective alone, which no honest scale difference could match.
-   * Scale only reinforces that: the four in front are held a little heavier,
-   * and nothing is ever shrunk to mark it down, because a stone made smaller
-   * than its neighbours reads as further away rather than lesser. Only the
-   * Experience anchor, which is not a pebble, stands apart in scale.
+   * Kept for the Experience anchor only. Every stone in the field is sized
+   * by its standing instead (projects/projectStanding.ts), one size per
+   * project rather than one per tier, so this value is not read for them.
    */
   scale: number;
   material: TierMaterial;
